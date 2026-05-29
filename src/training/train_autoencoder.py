@@ -12,6 +12,7 @@ from src.data.chestmnist_dataset import build_chestmnist_loaders, build_normal_a
 from src.models.autoencoder import ConvAutoencoder
 from src.training.evaluate import reconstruction_errors
 from src.utils.mlflow_utils import log_config, setup_mlflow
+from src.utils.plots import save_reconstruction_examples
 from src.utils.seed import get_device, set_seed
 
 
@@ -84,6 +85,13 @@ def main():
         mlflow.log_metric("test_normal_reconstruction_mse_mean", float(np.mean(test_normal_errors)))
         mlflow.log_metric("test_all_reconstruction_mse_mean", float(np.mean(test_all_errors)))
         mlflow.log_metric("test_all_anomaly_rate", float(np.mean(np.asarray(test_all_errors) >= threshold)))
+        recon_fig = save_reconstruction_examples(
+            model,
+            full_loaders["test"],
+            device,
+            output_dir / "autoencoder_reconstructions.png",
+        )
+        mlflow.log_artifact(str(recon_fig), artifact_path="figures")
         mlflow.log_artifact(str(best_path), artifact_path="models")
 
 

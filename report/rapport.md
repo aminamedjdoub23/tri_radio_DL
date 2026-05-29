@@ -31,6 +31,23 @@ Les images ChestMNIST sont redimensionnées à la taille définie dans `config.y
 
 Le split officiel MedMNIST est conservé pour limiter les choix arbitraires et réduire le risque de fuite de données. La seed est fixée dans tous les scripts pour améliorer la reproductibilité.
 
+Configuration et contraintes de calcul à compléter après exécution :
+
+| Élément | Valeur |
+|---|---|
+| Machine utilisée | À compléter |
+| CPU | À compléter |
+| GPU | À compléter |
+| RAM | À compléter |
+| Version Python | À compléter |
+| Version PyTorch | À compléter |
+| Temps CNN simple | À compléter |
+| Temps ResNet18 | À compléter |
+| Temps ViT | À compléter |
+| Temps autoencodeur | À compléter |
+
+Les choix d'optimisation restent simples : AdamW pour les modèles supervisés, Adam pour l'autoencodeur, batch size modéré, dropout dans les classifieurs et weight decay pour limiter le surapprentissage. Le meilleur modèle est sauvegardé selon la métrique de validation. Aucun scheduler complexe n'est imposé, car l'objectif est de garder un pipeline lisible et reproductible.
+
 ## 5. Modélisation supervisée image
 
 Trois architectures sont comparées :
@@ -54,6 +71,8 @@ Tableau à compléter après entraînement :
 La détection d'anomalies est réalisée avec un autoencodeur convolutionnel. Le modèle apprend à reconstruire des images considérées comme normales, définies ici comme les radiographies sans label positif. Cette stratégie est simple à expliquer : l'AE apprend une reconstruction de cas sans pathologie annotée, puis une image mal reconstruite est considérée comme atypique pour le modèle.
 
 Le score d'anomalie est l'erreur moyenne de reconstruction MSE. Le seuil est fixé au percentile 95 des erreurs sur la validation normale. Ce seuil est simple, reproductible et défendable, mais il ne correspond pas à une validation clinique.
+
+Le script sauvegarde aussi une figure d'exemples original/reconstruction dans MLflow. Elle sert à vérifier visuellement que l'autoencodeur apprend une reconstruction plausible et à discuter les limites du score.
 
 Tableau à compléter :
 
@@ -121,7 +140,7 @@ Le démonstrateur Streamlit permet :
 - d'uploader une radiographie ;
 - d'afficher les probabilités par pathologie ;
 - d'afficher un score d'anomalie si l'autoencodeur est disponible ;
-- de saisir un texte optionnel pour discuter de la partie multimodale.
+- de saisir un texte optionnel et de lancer la prédiction image + texte si le checkpoint multimodal OpenI et le vectorizer TF-IDF sont disponibles.
 
 L'application affiche clairement qu'il s'agit d'un prototype pédagogique et non d'un outil médical réel.
 

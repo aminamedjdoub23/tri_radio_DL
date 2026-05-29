@@ -6,6 +6,7 @@ import mlflow
 import pandas as pd
 import torch
 import yaml
+from joblib import dump
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.model_selection import train_test_split
 from torch import nn
@@ -107,7 +108,7 @@ def selection_metric(metrics):
     return auc
 
 
-def run_model(model, mode, loaders, config, device):
+def run_model(model, mode, loaders, config, device, vectorizer=None):
     optimizer = torch.optim.AdamW(model.parameters(), lr=config["openi"]["lr"])
     criterion = nn.BCEWithLogitsLoss()
     best_val_auc = -1.0
@@ -121,7 +122,15 @@ def run_model(model, mode, loaders, config, device):
         current_score = selection_metric(val_metrics)
         if current_score > best_val_auc:
             best_val_auc = current_score
-            torch.save({"model_state_dict": model.state_dict()}, best_path)
+            torch.save(
+                {
+                    "model_state_dict": model.state_dict(),
+                    "mode": mode,
+                    "label_columns": config["openi"]["label_columns"],
+                    "tfidf_dim": len(vectorizer.vocabulary_) if vectorizer is not None else None,
+                },
+                best_path,
+            )
 
     model.load_state_dict(torch.load(best_path, map_location=device)["model_state_dict"])
     test_metrics, _, _, _ = evaluate_multilabel(model, loaders["test"], device, threshold=0.5, input_mode=mode)
@@ -162,7 +171,10 @@ def main():
             num_classes=num_classes,
             pretrained_image=True,
         ).to(device)
-        run_model(multimodal_model, "multimodal", loaders, config, device)
+        run_model(multimodal_model, "multimodal", loaders, config, device, vectorizer=vectorizer)
+        vectorizer_path = Path(config["paths"]["output_dir"]) / "openi_tfidf_vectorizer.joblib"
+        dump(vectorizer, vectorizer_path)
+        mlflow.log_artifact(str(vectorizer_path), artifact_path="models")
 
 
 if __name__ == "__main__":

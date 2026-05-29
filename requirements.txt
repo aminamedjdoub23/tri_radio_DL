@@ -5,6 +5,7 @@ medmnist
 numpy
 pandas
 scikit-learn
+joblib
 matplotlib
 Pillow
 PyYAML
@@ -12,4 +13,3 @@ mlflow
 streamlit
 tqdm
 jupyter
-

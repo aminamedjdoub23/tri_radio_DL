@@ -81,6 +81,7 @@ Le démonstrateur affiche les probabilités par pathologie et un score d'anomali
 - `notebooks/01_eda_chestmnist.ipynb` : analyse exploratoire à exécuter après installation.
 - `notebooks/02_results_analysis.ipynb` : récupération des métriques MLflow après entraînement.
 - `report/rapport.md` : brouillon de rapport structuré, à compléter avec les vrais résultats.
+- `report/conformite_consigne.md` : vérification point par point avec la consigne.
 - `report/rapport_plan.md` : plan court si vous voulez garder une version synthétique.
 
 ## Limites connues
