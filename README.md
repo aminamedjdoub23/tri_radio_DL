@@ -84,6 +84,7 @@ Le démonstrateur affiche les probabilités par pathologie et un score d'anomali
 - `report/rapport.md` : brouillon de rapport structuré, à compléter avec les vrais résultats.
 - `report/conformite_consigne.md` : vérification point par point avec la consigne.
 - `report/etat_des_lieux_binome.md` : état des lieux des runs rapides, limites et prochaines étapes.
+- `report/openi_text_results.csv` : métriques du run texte OpenI officiel.
 - `report/rapport_plan.md` : plan court si vous voulez garder une version synthétique.
 
 ## Limites connues

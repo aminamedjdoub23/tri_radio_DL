@@ -105,10 +105,10 @@ Tableau à compléter si OpenI est préparé :
 | Modèle OpenI | AUC macro test | F1 macro test | Commentaire |
 |---|---:|---:|---|
 | Image seule | À compléter | À compléter | Baseline visuelle |
-| Texte seul | À compléter | À compléter | Baseline texte |
+| Texte seul | 0.9685 | 0.4965 | TF-IDF + MLP sur rapports OpenI officiels |
 | Multimodal | À compléter | À compléter | Fusion image + texte |
 
-La partie OpenI n'a pas été exécutée localement, car le CSV `data/openi/openi_prepared.csv` n'est pas disponible. Le code est présent et prêt à lancer dès que les images, comptes-rendus et labels OpenI sont préparés.
+La partie OpenI texte seul a été exécutée localement après téléchargement officiel des rapports NLM/OpenI. Le CSV `data/openi/openi_prepared.csv` contient 7470 lignes image-rapport. Le téléchargement officiel des images PNG a été tenté, mais il a dépassé le temps disponible ; les modèles image seule OpenI et multimodal image + texte restent donc à lancer lorsque les images sont entièrement disponibles.
 
 ## 8. Évaluation
 
@@ -123,6 +123,8 @@ Les métriques principales sont :
 Les courbes ROC sont sauvegardées comme artefacts MLflow pour la partie ChestMNIST supervisée.
 
 Un export synthétique des runs rapides est disponible dans `report/mlflow_quick_results.csv`. Les artefacts complets MLflow sont générés localement dans `mlruns_quick/`.
+
+Un export du run texte OpenI est disponible dans `report/openi_text_results.csv`. Les artefacts MLflow correspondants sont générés localement dans `mlruns_openi_text/`.
 
 ## 9. Tracking MLflow
 

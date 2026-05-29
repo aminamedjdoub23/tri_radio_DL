@@ -112,7 +112,7 @@ def main():
                 best_val_auc = current_score
                 torch.save({"model_state_dict": model.state_dict(), "vocabulary": vectorizer.vocabulary_}, best_path)
 
-        model.load_state_dict(torch.load(best_path, map_location=device)["model_state_dict"])
+        model.load_state_dict(torch.load(best_path, map_location=device, weights_only=False)["model_state_dict"])
         test_metrics, _, _, _ = evaluate_text_tensor(model, loaders["test"], device, threshold=0.5)
         log_metrics_dict({f"test_{k}": v for k, v in test_metrics.items()})
         mlflow.log_artifact(str(best_path), artifact_path="models")

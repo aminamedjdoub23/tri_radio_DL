@@ -121,7 +121,15 @@ Un script officiel a été ajouté :
 .venv\Scripts\python.exe -m src.data.prepare_openi_official
 ```
 
-Il utilise les archives OpenI/NLM `NLMCXR_reports.tgz` et `NLMCXR_png.tgz`. Lors du test du 29 mai 2026, le téléchargement officiel des rapports a fonctionné et a produit `data/openi/openi_prepared.csv` avec 7470 lignes image-rapport. Les images PNG restent à télécharger/extracter pour entraîner réellement le modèle multimodal image + texte.
+Il utilise les archives OpenI/NLM `NLMCXR_reports.tgz` et `NLMCXR_png.tgz`. Lors du test du 29 mai 2026, le téléchargement officiel des rapports a fonctionné et a produit `data/openi/openi_prepared.csv` avec 7470 lignes image-rapport. Un modèle texte seul TF-IDF + MLP a été entraîné sur 4 labels OpenI : Atelectasis, Cardiomegaly, Effusion et Pleural.
+
+Résultat texte OpenI :
+
+| Modèle | AUC macro test | F1 macro test | Précision macro | Rappel macro | Loss test |
+|---|---:|---:|---:|---:|---:|
+| TF-IDF + MLP | 0.9685 | 0.4965 | 0.9310 | 0.3591 | 0.1148 |
+
+Le téléchargement officiel des images PNG a été tenté, mais il a dépassé 30 minutes. Les images OpenI restent donc à télécharger/extracter si on veut entraîner `train_multimodal.py`.
 
 Puis renseigner `openi.label_columns` dans `config.yaml` avant de lancer :
 

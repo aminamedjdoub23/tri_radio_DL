@@ -52,6 +52,7 @@ Preuves d'exécution locale :
 ```text
 report/preuves_execution.md
 report/mlflow_quick_results.csv
+report/openi_text_results.csv
 ```
 
 Le rapport est structuré selon les sections demandées :

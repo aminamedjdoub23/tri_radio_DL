@@ -92,3 +92,21 @@ data/openi/openi_prepared.csv
 ```
 
 Le CSV contient 7470 lignes image-rapport. Les images PNG OpenI restent à télécharger/extracter avant d'entraîner réellement `train_multimodal.py`.
+
+Un entraînement texte seul OpenI a été exécuté avec :
+
+```bash
+.venv\Scripts\python.exe -m src.training.train_text --config config_openi_text.yaml
+```
+
+Résumé :
+
+| Modèle | AUC macro test | F1 macro test | Précision macro | Rappel macro | Loss test |
+|---|---:|---:|---:|---:|---:|
+| TF-IDF + MLP | 0.9685 | 0.4965 | 0.9310 | 0.3591 | 0.1148 |
+
+L'export est disponible dans :
+
+```text
+report/openi_text_results.csv
+```

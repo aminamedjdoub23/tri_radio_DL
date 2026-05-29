@@ -141,9 +141,12 @@ def main():
         if not args.reports_only:
             download_file(OFFICIAL_URLS["images"], images_archive)
 
-    if reports_archive.exists() and not args.images_only:
+    reports_exist = (data_dir / "reports").exists()
+    images_exist = (data_dir / "images").exists()
+
+    if reports_archive.exists() and not args.images_only and not reports_exist:
         extract_tgz(reports_archive, data_dir / "reports")
-    if images_archive.exists():
+    if images_archive.exists() and not images_exist:
         extract_tgz(images_archive, data_dir / "images")
 
     if not args.images_only:
