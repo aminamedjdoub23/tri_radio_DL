@@ -31,20 +31,22 @@ Le fichier ChestMNIST utilisé localement est configuré en résolution 64 pour 
 
 Le split officiel MedMNIST est conservé pour limiter les choix arbitraires et réduire le risque de fuite de données. La seed est fixée dans tous les scripts pour améliorer la reproductibilité.
 
-Configuration et contraintes de calcul à compléter après exécution :
+Configuration et contraintes de calcul utilisées pour les runs rapides locaux :
 
 | Élément | Valeur |
 |---|---|
-| Machine utilisée | À compléter |
-| CPU | À compléter |
-| GPU | À compléter |
-| RAM | À compléter |
-| Version Python | À compléter |
-| Version PyTorch | À compléter |
-| Temps CNN simple | À compléter |
-| Temps ResNet18 | À compléter |
-| Temps ViT | À compléter |
-| Temps autoencodeur | À compléter |
+| Machine utilisée | Ordinateur local Windows |
+| CPU | AMD64 Family 25 Model 68 |
+| GPU | CUDA non disponible |
+| RAM | Non relevée |
+| Version Python | 3.12.10 |
+| Version PyTorch | 2.12.0+cpu |
+| Temps CNN simple | environ 19 s en configuration rapide |
+| Temps ResNet18 | environ 21 s en configuration rapide |
+| Temps ViT | environ 20 s en configuration rapide |
+| Temps autoencodeur | environ 20 s en configuration rapide |
+
+Une configuration rapide `config_quick.yaml` a été ajoutée pour vérifier tout le pipeline sur CPU. Elle utilise ChestMNIST 64, un sous-échantillon de 512 images train, 128 validation et 128 test, et une seule epoch. Ces résultats servent à prouver que le pipeline est exécutable localement ; ils ne doivent pas être interprétés comme performances finales.
 
 Les choix d'optimisation restent simples : AdamW pour les modèles supervisés, Adam pour l'autoencodeur, batch size modéré, dropout dans les classifieurs et weight decay pour limiter le surapprentissage. Le meilleur modèle est sauvegardé selon la métrique de validation. Aucun scheduler complexe n'est imposé, car l'objectif est de garder un pipeline lisible et reproductible.
 
@@ -58,13 +60,15 @@ Trois architectures sont comparées :
 
 Les trois modèles produisent 14 logits. La sigmoïde est appliquée uniquement pour les métriques et l'affichage des probabilités, pas avant la loss.
 
-Tableau à compléter après entraînement :
+Résultats obtenus avec `config_quick.yaml` :
 
 | Modèle | AUC macro test | F1 macro test | Précision macro | Rappel macro | Commentaire |
 |---|---:|---:|---:|---:|---|
-| CNN simple | À compléter | À compléter | À compléter | À compléter | Baseline |
-| ResNet18 | À compléter | À compléter | À compléter | À compléter | Transfert |
-| ViT tiny | À compléter | À compléter | À compléter | À compléter | Attention |
+| CNN simple | non définie | 0.0000 | 0.0000 | 0.0000 | Baseline, run rapide CPU |
+| ResNet18 | non définie | 0.0000 | 0.0000 | 0.0000 | Transfert désactivé dans config rapide |
+| ViT tiny | non définie | 0.0000 | 0.0000 | 0.0000 | Attention, run rapide CPU |
+
+Les AUC macro sont non définies sur le sous-échantillon rapide, car certaines classes n'ont pas les deux valeurs positives/négatives dans le test. C'est une limite attendue d'un run de validation technique très court.
 
 ## 6. Détection d'anomalies
 
@@ -74,15 +78,15 @@ Le score d'anomalie est l'erreur moyenne de reconstruction MSE. Le seuil est fix
 
 Le script sauvegarde aussi une figure d'exemples original/reconstruction dans MLflow. Elle sert à vérifier visuellement que l'autoencodeur apprend une reconstruction plausible et à discuter les limites du score.
 
-Tableau à compléter :
+Résultats obtenus avec `config_quick.yaml` :
 
 | Métrique AE | Valeur |
 |---|---:|
-| MSE moyenne validation normale | À compléter |
-| Seuil percentile 95 | À compléter |
-| MSE moyenne test normal | À compléter |
-| MSE moyenne test complet | À compléter |
-| Taux atypique sur test complet | À compléter |
+| MSE moyenne validation normale | tracée dans MLflow |
+| Seuil percentile 95 | 0.0738 |
+| MSE moyenne test normal | 0.0501 |
+| MSE moyenne test complet | 0.0487 |
+| Taux atypique sur test complet | 0.0547 |
 
 Limite importante : un score élevé indique une reconstruction inhabituelle, pas une pathologie certaine. À l'inverse, une image pathologique peut parfois être bien reconstruite.
 
@@ -104,6 +108,8 @@ Tableau à compléter si OpenI est préparé :
 | Texte seul | À compléter | À compléter | Baseline texte |
 | Multimodal | À compléter | À compléter | Fusion image + texte |
 
+La partie OpenI n'a pas été exécutée localement, car le CSV `data/openi/openi_prepared.csv` n'est pas disponible. Le code est présent et prêt à lancer dès que les images, comptes-rendus et labels OpenI sont préparés.
+
 ## 8. Évaluation
 
 Les métriques principales sont :
@@ -115,6 +121,8 @@ Les métriques principales sont :
 - loss validation : suivi de l'apprentissage.
 
 Les courbes ROC sont sauvegardées comme artefacts MLflow pour la partie ChestMNIST supervisée.
+
+Un export synthétique des runs rapides est disponible dans `report/mlflow_quick_results.csv`. Les artefacts complets MLflow sont générés localement dans `mlruns_quick/`.
 
 ## 9. Tracking MLflow
 

@@ -47,6 +47,13 @@ report/conformite_consigne.md
 report/etat_des_lieux_binome.md
 ```
 
+Preuves d'exécution locale :
+
+```text
+report/preuves_execution.md
+report/mlflow_quick_results.csv
+```
+
 Le rapport est structuré selon les sections demandées :
 
 - Problème
