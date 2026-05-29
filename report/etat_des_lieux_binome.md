@@ -115,6 +115,14 @@ Pour OpenI, il faut préparer le CSV local :
 data/openi/openi_prepared.csv
 ```
 
+Un script officiel a été ajouté :
+
+```bash
+.venv\Scripts\python.exe -m src.data.prepare_openi_official
+```
+
+Il utilise les archives OpenI/NLM `NLMCXR_reports.tgz` et `NLMCXR_png.tgz`. Lors du test du 29 mai 2026, le téléchargement officiel des rapports a fonctionné et a produit `data/openi/openi_prepared.csv` avec 7470 lignes image-rapport. Les images PNG restent à télécharger/extracter pour entraîner réellement le modèle multimodal image + texte.
+
 Puis renseigner `openi.label_columns` dans `config.yaml` avant de lancer :
 
 ```bash

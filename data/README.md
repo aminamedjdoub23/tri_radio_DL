@@ -36,3 +36,31 @@ openi:
 ```
 
 La preuve de concept OpenI sert à comparer image seule, texte seul et fusion image + texte. Elle ne remplace pas ChestMNIST pour la partie obligatoire.
+
+### Préparation depuis la source officielle OpenI
+
+Le script `src/data/prepare_openi_official.py` utilise les liens officiels OpenI/NLM :
+
+- `https://openi.nlm.nih.gov/imgs/collections/NLMCXR_reports.tgz`
+- `https://openi.nlm.nih.gov/imgs/collections/NLMCXR_png.tgz`
+
+Commande :
+
+```bash
+python -m src.data.prepare_openi_official
+```
+
+Puis renseigner dans `config.yaml` :
+
+```yaml
+paths:
+  openi_csv: data/openi/openi_prepared.csv
+openi:
+  label_columns:
+    - Atelectasis
+    - Cardiomegaly
+    - Effusion
+    - Infiltration
+```
+
+Si OpenI renvoie une page de maintenance au lieu des archives, relancer plus tard. Le script détecte ce cas pour éviter de sauvegarder une page HTML à la place des données.

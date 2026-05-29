@@ -75,3 +75,20 @@ Ces dossiers ne sont pas poussés sur GitHub car ils contiennent des checkpoints
 ## Limite
 
 Les runs rapides prouvent que le pipeline fonctionne, mais ils utilisent un sous-échantillon et une seule epoch. Les métriques ne doivent pas être présentées comme performance finale robuste.
+
+## OpenI officiel
+
+Les liens officiels OpenI/NLM utilisés par le script sont :
+
+```text
+https://openi.nlm.nih.gov/imgs/collections/NLMCXR_reports.tgz
+https://openi.nlm.nih.gov/imgs/collections/NLMCXR_png.tgz
+```
+
+Lors du test du 29 mai 2026, le téléchargement officiel des rapports XML a fonctionné et a permis de produire :
+
+```text
+data/openi/openi_prepared.csv
+```
+
+Le CSV contient 7470 lignes image-rapport. Les images PNG OpenI restent à télécharger/extracter avant d'entraîner réellement `train_multimodal.py`.

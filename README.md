@@ -52,11 +52,12 @@ Les runs ChestMNIST téléchargent les données via MedMNIST dans `data/raw`. Le
 Pour OpenI, préparer d'abord un CSV local avec les colonnes indiquées dans `data/README.md`, puis :
 
 ```bash
+python -m src.data.prepare_openi_official
 python -m src.training.train_text --config config.yaml
 python -m src.training.train_multimodal --config config.yaml
 ```
 
-Si OpenI n'est pas encore préparé, laisser `openi.label_columns: []` dans `config.yaml` et ne lancer que la partie ChestMNIST.
+Si OpenI n'est pas encore préparé, laisser `openi.label_columns: []` dans `config.yaml` et ne lancer que la partie ChestMNIST. Le script OpenI utilise les liens officiels NLM ; si le site OpenI est en maintenance, relancer plus tard.
 
 ## MLflow
 
