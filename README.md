@@ -47,7 +47,7 @@ python -m src.training.train_supervised --model vit --config config.yaml
 python -m src.training.train_autoencoder --config config.yaml
 ```
 
-Les runs ChestMNIST téléchargent les données via MedMNIST dans `data/raw`. Selon la machine, le modèle ViT peut être plus long que les deux CNN.
+Les runs ChestMNIST téléchargent les données via MedMNIST dans `data/raw`. Le fichier source configuré par défaut est ChestMNIST 64 pour rester faisable localement, puis les images sont redimensionnées à 224 pour les modèles. Selon la machine, le modèle ViT peut être plus long que les deux CNN.
 
 Pour OpenI, préparer d'abord un CSV local avec les colonnes indiquées dans `data/README.md`, puis :
 
@@ -82,6 +82,7 @@ Le démonstrateur affiche les probabilités par pathologie et un score d'anomali
 - `notebooks/02_results_analysis.ipynb` : récupération des métriques MLflow après entraînement.
 - `report/rapport.md` : brouillon de rapport structuré, à compléter avec les vrais résultats.
 - `report/conformite_consigne.md` : vérification point par point avec la consigne.
+- `report/etat_des_lieux_binome.md` : état des lieux des runs rapides, limites et prochaines étapes.
 - `report/rapport_plan.md` : plan court si vous voulez garder une version synthétique.
 
 ## Limites connues

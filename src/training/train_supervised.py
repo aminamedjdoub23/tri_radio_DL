@@ -32,6 +32,7 @@ def build_model(name, config):
             name=config["models"]["vit_name"],
             num_classes=NUM_CLASSES,
             pretrained=config["models"]["pretrained"],
+            img_size=config["chestmnist"]["size"],
         )
     raise ValueError(f"Modèle inconnu: {name}")
 

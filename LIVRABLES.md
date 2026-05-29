@@ -41,6 +41,12 @@ Fichier de vérification avec la consigne :
 report/conformite_consigne.md
 ```
 
+État des lieux pour le binôme :
+
+```text
+report/etat_des_lieux_binome.md
+```
+
 Le rapport est structuré selon les sections demandées :
 
 - Problème

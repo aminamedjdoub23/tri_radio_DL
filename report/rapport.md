@@ -27,7 +27,7 @@ Les observations attendues sont un déséquilibre marqué et des co-occurrences 
 
 ## 4. Préparation
 
-Les images ChestMNIST sont redimensionnées à la taille définie dans `config.yaml`. Les modèles supervisés utilisent une normalisation simple et des augmentations légères sur le train : flip horizontal et petite rotation. Ces augmentations restent volontairement limitées pour ne pas transformer excessivement des images médicales.
+Le fichier ChestMNIST utilisé localement est configuré en résolution 64 pour rester compatible avec le temps de calcul disponible. Les images sont ensuite redimensionnées à 224 dans les transformations afin d'utiliser les mêmes architectures ResNet et ViT. Les modèles supervisés utilisent une normalisation simple et des augmentations légères sur le train : flip horizontal et petite rotation. Ces augmentations restent volontairement limitées pour ne pas transformer excessivement des images médicales.
 
 Le split officiel MedMNIST est conservé pour limiter les choix arbitraires et réduire le risque de fuite de données. La seed est fixée dans tous les scripts pour améliorer la reproductibilité.
 

@@ -31,7 +31,7 @@ def build_classifier(model_name, config):
     if model_name == "transfer":
         return build_transfer_model(config["models"]["transfer_name"], NUM_CLASSES, pretrained=False)
     if model_name == "vit":
-        return build_vit_model(config["models"]["vit_name"], NUM_CLASSES, pretrained=False)
+        return build_vit_model(config["models"]["vit_name"], NUM_CLASSES, pretrained=False, img_size=config["chestmnist"]["size"])
     raise ValueError(f"Modèle inconnu: {model_name}")
 
 

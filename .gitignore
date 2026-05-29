@@ -6,7 +6,10 @@ __pycache__/
 data/raw/
 data/openi/
 outputs/
+outputs_quick/
 mlruns/
+mlruns_quick/
+.pip-tmp/
 
 *.pt
 *.pth
