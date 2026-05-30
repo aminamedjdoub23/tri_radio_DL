@@ -11,6 +11,7 @@ from tqdm import tqdm
 from src.data.chestmnist_dataset import build_chestmnist_loaders, build_normal_autoencoder_loaders
 from src.models.autoencoder import ConvAutoencoder
 from src.training.evaluate import reconstruction_errors
+from src.utils.early_stopping import is_improved, parse_early_stopping
 from src.utils.mlflow_utils import log_config, setup_mlflow
 from src.utils.plots import save_reconstruction_examples
 from src.utils.seed import get_device, set_seed
@@ -51,6 +52,13 @@ def main():
     criterion = nn.MSELoss()
     best_val_loss = float("inf")
     best_path = output_dir / "best_autoencoder.pt"
+    early = parse_early_stopping(config, default_monitor="val_reconstruction_mse")
+    if early:
+        monitor_name = early["monitor"].lower()
+        if "loss" not in monitor_name and "mse" not in monitor_name:
+            early = None
+    early_best = None
+    early_bad_epochs = 0
 
     with mlflow.start_run(run_name="chestmnist_autoencoder"):
         mlflow.log_params({
@@ -72,6 +80,14 @@ def main():
             if val_loss < best_val_loss:
                 best_val_loss = val_loss
                 torch.save({"model_state_dict": model.state_dict(), "config": config}, best_path)
+            if early:
+                if is_improved(val_loss, early_best, early["monitor"], early["min_delta"]):
+                    early_best = val_loss
+                    early_bad_epochs = 0
+                else:
+                    early_bad_epochs += 1
+                if early_bad_epochs >= early["patience"]:
+                    break
 
         checkpoint = torch.load(best_path, map_location=device)
         model.load_state_dict(checkpoint["model_state_dict"])

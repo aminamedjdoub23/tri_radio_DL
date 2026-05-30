@@ -1,0 +1,3 @@
+tags.mlflow.runName,metrics.test_loss,metrics.test_auc_macro,metrics.test_f1_macro,metrics.test_precision_macro,metrics.test_recall_macro,metrics.anomaly_threshold,metrics.test_all_anomaly_rate,metrics.test_all_reconstruction_mse_mean,metrics.test_normal_reconstruction_mse_mean
+chestmnist_transfer,0.1794431763701141,0.6727177769842533,0.0021645021645021645,0.01020408163265306,0.0012106537530266344,,,,
+chestmnist_autoencoder,,,,,,0.000611212878720834,0.064453125,0.0003667018286819257,0.0003893171500504962

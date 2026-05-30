@@ -1,2 +1,2 @@
 tags.mlflow.runName,metrics.test_auc_macro,metrics.test_f1_macro,metrics.test_precision_macro,metrics.test_recall_macro,metrics.test_loss
-openi_text_tfidf_mlp,0.96845,0.496454,0.930952,0.359061,0.114804
+openi_text_tfidf_mlp,0.9684503926168008,0.4964544595189756,0.930952380952381,0.35906055164590284,0.11480392029301988

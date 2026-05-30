@@ -1,6 +1,6 @@
 # Preuves d'exécution locale
 
-Ce document résume les preuves générées localement avant l'envoi du projet.
+Ce document résume les preuves réellement régénérées sur cette machine le 30 mai 2026.
 
 ## Dataset
 
@@ -12,22 +12,29 @@ data/raw/chestmnist_64.npz
 
 Vérification :
 
-| Fichier | Taille | MD5 |
-|---|---:|---|
-| `chestmnist_64.npz` | 401604127 octets | `9de6cd0b934ebb5b7426cfba5efbae16` |
+| Fichier             |           Taille |
+| ------------------- | ---------------: |
+| `chestmnist_64.npz` | 401604127 octets |
 
-Ce MD5 correspond au hash officiel MedMNIST pour `chestmnist_64.npz`.
+Le fichier a été téléchargé automatiquement via `medmnist` lors des entraînements.
 
 ## Environnement
 
-Les dépendances ont été installées dans `.venv`.
+L'environnement principal a été créé dans `.venv`.
 
-| Élément | Valeur |
-|---|---|
-| Python | 3.12.10 |
-| PyTorch | 2.12.0+cpu |
-| torchvision | 0.27.0+cpu |
-| CUDA | non disponible |
+| Élément     | Valeur                   |
+| ----------- | ------------------------ |
+| Python      | 3.13.1                   |
+| PyTorch     | 2.12.0+cpu               |
+| torchvision | 0.27.0+cpu               |
+| CUDA        | non disponible           |
+| CPU         | AMD64 Family 25 Model 68 |
+
+Remarque :
+
+- `requirements.txt` est maintenant suffisant pour le pipeline principal ;
+- `jupyter` a été déplacé dans `requirements-notebooks.txt` car son installation échouait ici à cause des chemins Windows trop longs ;
+- les notebooks restent optionnels et distincts du pipeline d'entraînement.
 
 ## Validations réalisées
 
@@ -35,10 +42,28 @@ Commandes exécutées :
 
 ```bash
 .venv\Scripts\python.exe -m compileall src
-.venv\Scripts\python.exe -c "import torch, torchvision, timm, medmnist, mlflow, streamlit"
+.venv\Scripts\python.exe -c "import torch, torchvision, timm, medmnist, mlflow, streamlit; print('imports ok')"
 ```
 
 Résultat : syntaxe et imports OK.
+
+## Smoke test Streamlit
+
+L'application a été démarrée en mode headless sur le port 8502 puis interrogée localement.
+
+Commande utilisée :
+
+```bash
+python -m streamlit run src/app/streamlit_app.py --server.headless true --server.port 8502
+```
+
+Résultat :
+
+| Vérification        | Valeur |
+| ------------------- | ------ |
+| Réponse HTTP locale | `200`  |
+
+Cela prouve que l'application démarre correctement sur cette machine.
 
 ## Runs rapides MLflow
 
@@ -48,22 +73,7 @@ Les runs rapides ont été exécutés avec :
 config_quick.yaml
 ```
 
-Résumé exporté :
-
-```text
-report/mlflow_quick_results.csv
-```
-
-Artefacts générés localement :
-
-```text
-outputs_quick/
-mlruns_quick/
-```
-
-Ces dossiers ne sont pas poussés sur GitHub car ils contiennent des checkpoints, figures et traces générées. Ils peuvent être joints séparément si le professeur demande les artefacts bruts.
-
-## Commandes de reproduction rapide
+Commandes :
 
 ```bash
 .venv\Scripts\python.exe -m src.training.train_supervised --model simple_cnn --config config_quick.yaml
@@ -72,9 +82,58 @@ Ces dossiers ne sont pas poussés sur GitHub car ils contiennent des checkpoints
 .venv\Scripts\python.exe -m src.training.train_autoencoder --config config_quick.yaml
 ```
 
-## Limite
+Résumé exporté :
 
-Les runs rapides prouvent que le pipeline fonctionne, mais ils utilisent un sous-échantillon et une seule epoch. Les métriques ne doivent pas être présentées comme performance finale robuste.
+```text
+report/mlflow_quick_results.csv
+```
+
+Artefacts réellement générés localement :
+
+```text
+outputs_quick/
+mlruns_quick/
+```
+
+Checkpoints présents :
+
+- `outputs_quick/best_simple_cnn.pt`
+- `outputs_quick/best_transfer.pt`
+- `outputs_quick/best_vit.pt`
+- `outputs_quick/best_autoencoder.pt`
+
+## Runs CPU intermédiaires
+
+Pour obtenir des résultats plus crédibles que les quick runs sur cette machine CPU, une configuration intermédiaire a été ajoutée :
+
+```text
+config_cpu_medium.yaml
+```
+
+Commandes exécutées :
+
+```bash
+.venv\Scripts\python.exe -m src.training.train_supervised --model transfer --config config_cpu_medium.yaml
+.venv\Scripts\python.exe -m src.training.train_autoencoder --config config_cpu_medium.yaml
+```
+
+Résumé exporté :
+
+```text
+report/mlflow_cpu_medium_results.csv
+```
+
+Artefacts réellement générés localement :
+
+```text
+outputs_cpu_medium/
+mlruns_cpu_medium/
+```
+
+Checkpoints présents :
+
+- `outputs_cpu_medium/best_transfer.pt`
+- `outputs_cpu_medium/best_autoencoder.pt`
 
 ## OpenI officiel
 
@@ -85,13 +144,13 @@ https://openi.nlm.nih.gov/imgs/collections/NLMCXR_reports.tgz
 https://openi.nlm.nih.gov/imgs/collections/NLMCXR_png.tgz
 ```
 
-Lors du test du 29 mai 2026, le téléchargement officiel des rapports XML a fonctionné et a permis de produire :
+Le 30 mai 2026, le téléchargement officiel des rapports XML a fonctionné et a permis de produire :
 
 ```text
 data/openi/openi_prepared.csv
 ```
 
-Le CSV contient 7470 lignes image-rapport. Les images PNG OpenI restent à télécharger/extracter avant d'entraîner réellement `train_multimodal.py`.
+Le CSV contient 7470 lignes image-rapport.
 
 Un entraînement texte seul OpenI a été exécuté avec :
 
@@ -99,14 +158,32 @@ Un entraînement texte seul OpenI a été exécuté avec :
 .venv\Scripts\python.exe -m src.training.train_text --config config_openi_text.yaml
 ```
 
-Résumé :
-
-| Modèle | AUC macro test | F1 macro test | Précision macro | Rappel macro | Loss test |
-|---|---:|---:|---:|---:|---:|
-| TF-IDF + MLP | 0.9685 | 0.4965 | 0.9310 | 0.3591 | 0.1148 |
-
-L'export est disponible dans :
+Résumé exporté :
 
 ```text
 report/openi_text_results.csv
 ```
+
+Artefacts réellement générés localement :
+
+```text
+outputs_openi_text/
+mlruns_openi_text/
+```
+
+Checkpoint présent :
+
+- `outputs_openi_text/best_openi_text.pt`
+
+Configuration prévue pour l'entraînement OpenI image seule + multimodal :
+
+```text
+config_openi_multimodal.yaml
+```
+
+## Limites
+
+- les quick runs prouvent le fonctionnement du pipeline, mais ne constituent pas des résultats finaux robustes ;
+- les runs CPU intermédiaires sont plus crédibles, mais restent des entraînements partiels sur sous-échantillon ;
+- les images PNG OpenI n'ont pas encore été téléchargées ici, donc `train_multimodal.py` n'a pas encore été exécuté sur cette machine ;
+- les captures d'écran MLflow et Streamlit restent à faire si elles sont demandées dans le rendu final.

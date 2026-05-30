@@ -8,9 +8,20 @@ from src.models.transfer_model import ImageEncoder
 class MultimodalFusionModel(nn.Module):
     """Fusion intermédiaire : concaténation embedding image + embedding texte."""
 
-    def __init__(self, tfidf_dim: int, num_classes: int, embedding_dim: int = 128, pretrained_image: bool = True):
+    def __init__(
+        self,
+        tfidf_dim: int,
+        num_classes: int,
+        embedding_dim: int = 128,
+        image_encoder_name: str = "resnet18",
+        pretrained_image: bool = True,
+    ):
         super().__init__()
-        self.image_encoder = ImageEncoder(embedding_dim=embedding_dim, pretrained=pretrained_image)
+        self.image_encoder = ImageEncoder(
+            embedding_dim=embedding_dim,
+            name=image_encoder_name,
+            pretrained=pretrained_image,
+        )
         self.text_encoder = TextEncoder(input_dim=tfidf_dim, embedding_dim=embedding_dim)
         self.classifier = nn.Sequential(
             nn.Linear(embedding_dim * 2, 128),

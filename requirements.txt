@@ -12,4 +12,3 @@ PyYAML
 mlflow
 streamlit
 tqdm
-jupyter

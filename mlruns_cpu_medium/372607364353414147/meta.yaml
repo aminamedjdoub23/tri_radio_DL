@@ -1,0 +1,8 @@
+artifact_location: file:C:/Users/Héctor/OneDrive/Desktop/Projects/EFREI/M1-DE/ML-DL/tri_radio_DL/mlruns_cpu_medium/372607364353414147
+creation_time: 1780141670664
+experiment_id: '372607364353414147'
+last_update_time: 1780141670664
+lifecycle_stage: active
+name: tri_radiologique_chestmnist_cpu_medium
+trace_location: null
+workspace: default

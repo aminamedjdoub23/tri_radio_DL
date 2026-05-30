@@ -52,6 +52,7 @@ Preuves d'exécution locale :
 ```text
 report/preuves_execution.md
 report/mlflow_quick_results.csv
+report/mlflow_cpu_medium_results.csv
 report/openi_text_results.csv
 ```
 
@@ -70,12 +71,11 @@ Le rapport est structuré selon les sections demandées :
 - Analyse critique
 - Conclusion et perspectives
 
-À compléter après entraînement réel :
+À compléter éventuellement après entraînement plus long :
 
-- les tableaux de résultats ;
 - les captures MLflow ;
 - les captures du démonstrateur ;
-- les commentaires sur les performances obtenues.
+- les commentaires sur des performances finales plus robustes.
 
 ## 3. Code source
 
@@ -160,12 +160,18 @@ Fonctionnalités :
 
 ## 8. Commandes minimales à exécuter
 
-Installation :
+Installation du pipeline principal :
 
 ```bash
-py -3.12 -m venv .venv
+python -m venv .venv
 .venv\Scripts\activate
 pip install -r requirements.txt
+```
+
+Notebooks, si nécessaire :
+
+```bash
+pip install -r requirements-notebooks.txt
 ```
 
 Entraînements minimaux pour un rendu crédible :
@@ -177,23 +183,31 @@ python -m src.training.train_supervised --model vit --config config.yaml
 python -m src.training.train_autoencoder --config config.yaml
 ```
 
+Alternative réaliste sur CPU si le full run n'est pas faisable :
+
+```bash
+python -m src.training.train_supervised --model transfer --config config_cpu_medium.yaml
+python -m src.training.train_autoencoder --config config_cpu_medium.yaml
+```
+
 Multimodal, uniquement si le CSV OpenI est préparé :
 
 ```bash
-python -m src.training.train_text --config config.yaml
-python -m src.training.train_multimodal --config config.yaml
+python -m src.training.train_text --config config_openi_text.yaml
+python -m src.training.train_multimodal --config config_openi_multimodal.yaml
 ```
 
 ## 9. Checklist avant rendu final
 
-- [ ] Installer les dépendances dans un environnement Python 3.11 ou 3.12.
+- [x] Installer les dépendances du pipeline principal dans `.venv`.
 - [ ] Exécuter le notebook EDA.
-- [ ] Entraîner les trois modèles supervisés.
-- [ ] Entraîner l'autoencodeur.
-- [ ] Lancer MLflow et relever les métriques.
-- [ ] Compléter les tableaux du rapport.
+- [x] Entraîner les trois modèles supervisés en mode rapide.
+- [x] Entraîner l'autoencodeur en mode rapide.
+- [x] Produire un run CPU intermédiaire `transfer + autoencoder`.
+- [x] Lancer MLflow et relever les métriques disponibles.
+- [x] Compléter les tableaux du rapport avec les vrais résultats disponibles.
 - [ ] Ajouter des captures MLflow et Streamlit si demandées.
-- [ ] Tester le démonstrateur avec au moins un checkpoint.
+- [x] Tester le démonstrateur via un smoke test de démarrage.
 - [ ] Vérifier que le dépôt GitHub est accessible au binôme.
 
 ## Remarque importante

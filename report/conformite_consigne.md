@@ -6,7 +6,14 @@ Ce document relie les exigences du sujet aux fichiers du projet.
 
 Le projet est cohérent avec la consigne : il couvre la classification multi-label ChestMNIST, trois architectures image, la détection d'anomalies par autoencodeur, une preuve de concept multimodale OpenI, MLflow, Streamlit, un pipeline reproductible et un rapport structuré.
 
-Les résultats chiffrés ne sont pas inventés. Ils doivent être complétés après entraînement réel.
+Des résultats réellement obtenus localement existent maintenant pour :
+
+- les 3 runs rapides ChestMNIST ;
+- un run CPU intermédiaire ResNet18 ;
+- un run CPU intermédiaire autoencodeur ;
+- un run OpenI texte seul.
+
+La partie encore incomplète est la comparaison OpenI image seule / multimodal image + texte, qui dépend encore du téléchargement local des images PNG officielles.
 
 ## Correspondance exigence / implémentation
 
@@ -34,20 +41,18 @@ Les résultats chiffrés ne sont pas inventés. Ils doivent être complétés ap
 | Sauvegarde du meilleur modèle | Couvert | scripts d'entraînement |
 | Rapport structuré selon les sections imposées | Couvert | `report/rapport.md` |
 | README clair | Couvert | `README.md` |
-| Documentation matériel et temps | Prévu à compléter | tableau dans `report/rapport.md` |
+| Documentation matériel et temps | Partiellement couvert | tableau dans `report/rapport.md` |
 
 ## Points à compléter après exécution
 
 Ces éléments dépendent d'un entraînement réel et ne doivent pas être inventés :
 
-- métriques des trois modèles supervisés ;
-- métriques de l'autoencodeur ;
-- éventuels résultats OpenI ;
-- captures MLflow ;
-- captures Streamlit ;
-- temps d'entraînement ;
-- configuration matérielle exacte.
+- résultats complets longue durée pour les trois modèles supervisés ;
+- résultats image seule OpenI et multimodal OpenI ;
+- captures MLflow si demandées ;
+- captures Streamlit si demandées ;
+- mesures plus fines de temps si un rendu très détaillé est attendu.
 
 ## Commentaire sur OpenI
 
-La consigne demande une composante multimodale si les données sont disponibles. Le projet prévoit OpenI avec un CSV préparé localement. Tant que ce CSV n'est pas fourni, la partie ChestMNIST reste entièrement exécutable et la partie OpenI reste une preuve de concept prête à lancer.
+La consigne demande une composante multimodale si les données sont disponibles. Le projet prévoit OpenI avec un CSV préparé localement, et ce CSV a maintenant été généré sur cette machine à partir des rapports officiels NLM/OpenI. Tant que les images PNG OpenI ne sont pas entièrement téléchargées/extraites, la partie ChestMNIST reste la base exécutable complète et la partie OpenI image+texte reste une preuve de concept partiellement réalisée.

@@ -18,16 +18,24 @@ Le choix principal est volontairement simple : ChestMNIST est utilisé pour la c
 
 ## Installation
 
-Recommandation : utiliser Python 3.11 ou 3.12. Le projet dépend de PyTorch/torchvision, et certaines versions très récentes de Python peuvent ne pas encore avoir toutes les roues disponibles selon la machine.
+Recommandation : utiliser Python 3.11 ou 3.12. Le projet dépend de PyTorch/torchvision, et certaines versions très récentes de Python peuvent ne pas encore avoir toutes les roues disponibles selon la machine. Le pipeline principal a aussi été validé localement ici avec Python 3.13.1 sur CPU.
 
 ```bash
 cd project
-py -3.12 -m venv .venv
+python -m venv .venv
 .venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
 Avec GPU CUDA, installer au besoin une version PyTorch adaptée depuis le site officiel PyTorch avant les autres dépendances.
+
+Pour les notebooks, installer en plus :
+
+```bash
+pip install -r requirements-notebooks.txt
+```
+
+Sous Windows, l'installation de `jupyter` peut échouer si les chemins longs ne sont pas activés. Dans ce cas, le pipeline principal reste utilisable avec `requirements.txt`, et la partie notebook peut être installée séparément dans un environnement plus court.
 
 Vérification rapide :
 
@@ -49,12 +57,19 @@ python -m src.training.train_autoencoder --config config.yaml
 
 Les runs ChestMNIST téléchargent les données via MedMNIST dans `data/raw`. Le fichier source configuré par défaut est ChestMNIST 64 pour rester faisable localement, puis les images sont redimensionnées à 224 pour les modèles. Selon la machine, le modèle ViT peut être plus long que les deux CNN.
 
+Une configuration CPU intermédiaire est aussi fournie pour obtenir des résultats plus crédibles que `config_quick.yaml` sans prétendre à un entraînement final complet :
+
+```bash
+python -m src.training.train_supervised --model transfer --config config_cpu_medium.yaml
+python -m src.training.train_autoencoder --config config_cpu_medium.yaml
+```
+
 Pour OpenI, préparer d'abord un CSV local avec les colonnes indiquées dans `data/README.md`, puis :
 
 ```bash
 python -m src.data.prepare_openi_official
-python -m src.training.train_text --config config.yaml
-python -m src.training.train_multimodal --config config.yaml
+python -m src.training.train_text --config config_openi_text.yaml
+python -m src.training.train_multimodal --config config_openi_multimodal.yaml
 ```
 
 Si OpenI n'est pas encore préparé, laisser `openi.label_columns: []` dans `config.yaml` et ne lancer que la partie ChestMNIST. Le script OpenI utilise les liens officiels NLM ; si le site OpenI est en maintenance, relancer plus tard.
@@ -84,6 +99,7 @@ Le démonstrateur affiche les probabilités par pathologie et un score d'anomali
 - `report/rapport.md` : brouillon de rapport structuré, à compléter avec les vrais résultats.
 - `report/conformite_consigne.md` : vérification point par point avec la consigne.
 - `report/etat_des_lieux_binome.md` : état des lieux des runs rapides, limites et prochaines étapes.
+- `report/mlflow_cpu_medium_results.csv` : métriques du run CPU intermédiaire `transfer + autoencoder`.
 - `report/openi_text_results.csv` : métriques du run texte OpenI officiel.
 - `report/rapport_plan.md` : plan court si vous voulez garder une version synthétique.
 

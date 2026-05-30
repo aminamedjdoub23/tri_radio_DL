@@ -13,6 +13,7 @@ from src.models.simple_cnn import SimpleCNN
 from src.models.transfer_model import build_transfer_model
 from src.models.vit_model import build_vit_model
 from src.training.evaluate import evaluate_multilabel
+from src.utils.early_stopping import is_improved, parse_early_stopping, resolve_monitor_value
 from src.utils.mlflow_utils import log_auc_per_class, log_config, log_metrics_dict, setup_mlflow
 from src.utils.plots import save_auc_bar, save_roc_curves
 from src.utils.seed import get_device, set_seed
@@ -84,6 +85,9 @@ def main():
 
     best_val_auc = -1.0
     best_path = output_dir / f"best_{args.model}.pt"
+    early = parse_early_stopping(config, default_monitor="val_auc_macro")
+    early_best = None
+    early_bad_epochs = 0
 
     with mlflow.start_run(run_name=f"chestmnist_{args.model}"):
         mlflow.log_params({
@@ -109,6 +113,16 @@ def main():
             if current_score > best_val_auc:
                 best_val_auc = current_score
                 torch.save({"model_state_dict": model.state_dict(), "config": config, "model_name": args.model}, best_path)
+            if early:
+                monitor_value = resolve_monitor_value(val_metrics, early["monitor"])
+                if monitor_value is not None:
+                    if is_improved(monitor_value, early_best, early["monitor"], early["min_delta"]):
+                        early_best = monitor_value
+                        early_bad_epochs = 0
+                    else:
+                        early_bad_epochs += 1
+                    if early_bad_epochs >= early["patience"]:
+                        break
 
         checkpoint = torch.load(best_path, map_location=device)
         model.load_state_dict(checkpoint["model_state_dict"])

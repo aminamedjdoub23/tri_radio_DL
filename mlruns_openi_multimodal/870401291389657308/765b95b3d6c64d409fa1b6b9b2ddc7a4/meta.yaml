@@ -1,0 +1,14 @@
+artifact_uri: file:C:/Users/Héctor/OneDrive/Desktop/Projects/EFREI/M1-DE/ML-DL/tri_radio_DL/mlruns_openi_multimodal/870401291389657308/765b95b3d6c64d409fa1b6b9b2ddc7a4/artifacts
+end_time: 1780151388503
+entry_point_name: ''
+experiment_id: '870401291389657308'
+lifecycle_stage: active
+run_id: 765b95b3d6c64d409fa1b6b9b2ddc7a4
+run_name: openi_image_vs_multimodal
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1780149343938
+status: 4
+tags: []
+user_id: Héctor

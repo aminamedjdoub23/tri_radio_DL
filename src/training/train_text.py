@@ -14,6 +14,7 @@ from tqdm import tqdm
 
 from src.models.text_model import TextMLP
 from src.training.evaluate import evaluate_multilabel
+from src.utils.early_stopping import is_improved, parse_early_stopping, resolve_monitor_value
 from src.utils.mlflow_utils import log_config, log_metrics_dict, setup_mlflow
 from src.utils.seed import get_device, set_seed
 
@@ -91,6 +92,9 @@ def main():
     criterion = nn.BCEWithLogitsLoss()
     best_val_auc = -1.0
     best_path = output_dir / "best_openi_text.pt"
+    early = parse_early_stopping(config, default_monitor="val_auc_macro")
+    early_best = None
+    early_bad_epochs = 0
 
     with mlflow.start_run(run_name="openi_text_tfidf_mlp"):
         mlflow.log_params({
@@ -111,6 +115,16 @@ def main():
             if current_score > best_val_auc:
                 best_val_auc = current_score
                 torch.save({"model_state_dict": model.state_dict(), "vocabulary": vectorizer.vocabulary_}, best_path)
+            if early:
+                monitor_value = resolve_monitor_value(val_metrics, early["monitor"])
+                if monitor_value is not None:
+                    if is_improved(monitor_value, early_best, early["monitor"], early["min_delta"]):
+                        early_best = monitor_value
+                        early_bad_epochs = 0
+                    else:
+                        early_bad_epochs += 1
+                    if early_bad_epochs >= early["patience"]:
+                        break
 
         model.load_state_dict(torch.load(best_path, map_location=device, weights_only=False)["model_state_dict"])
         test_metrics, _, _, _ = evaluate_text_tensor(model, loaders["test"], device, threshold=0.5)

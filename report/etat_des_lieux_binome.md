@@ -1,17 +1,18 @@
 # État des lieux pour le binôme
 
-Dernière mise à jour : 29 mai 2026.
+Dernière mise à jour : 30 mai 2026.
 
 ## Ce qui est prêt
 
-Le dépôt GitHub contient maintenant une base complète et cohérente avec la consigne :
+Le dépôt GitHub contient une base complète et cohérente avec la consigne :
 
 - code PyTorch modulaire ;
 - chargement ChestMNIST via MedMNIST ;
 - classification multi-label 14 pathologies ;
 - CNN simple, ResNet18 et ViT ;
 - autoencodeur convolutionnel pour score d'anomalie ;
-- preuve de concept OpenI image + texte prévue dans le code ;
+- preuve de concept OpenI texte seul réellement exécutée ;
+- preuve de concept multimodale image + texte prévue dans le code ;
 - tracking MLflow ;
 - démonstrateur Streamlit ;
 - rapport structuré ;
@@ -20,17 +21,17 @@ Le dépôt GitHub contient maintenant une base complète et cohérente avec la c
 
 ## Environnement validé localement
 
-L'environnement `.venv` a été créé et les dépendances sont installées localement.
+L'environnement `.venv` a été recréé et validé localement.
 
 Versions vérifiées :
 
-| Élément | Valeur |
-|---|---|
-| Python | 3.12.10 |
-| PyTorch | 2.12.0+cpu |
-| torchvision | 0.27.0+cpu |
-| CUDA | non disponible |
-| CPU | AMD64 Family 25 Model 68 |
+| Élément     | Valeur                   |
+| ----------- | ------------------------ |
+| Python      | 3.13.1                   |
+| PyTorch     | 2.12.0+cpu               |
+| torchvision | 0.27.0+cpu               |
+| CUDA        | non disponible           |
+| CPU         | AMD64 Family 25 Model 68 |
 
 Le projet a été validé avec :
 
@@ -39,9 +40,14 @@ Le projet a été validé avec :
 .venv\Scripts\python.exe -c "import torch, torchvision, timm, medmnist, mlflow, streamlit"
 ```
 
-## Pourquoi il y a une config rapide
+Point pratique :
 
-Le téléchargement automatique de ChestMNIST 224 a échoué : le fichier pèse environ 3,89 Go et le téléchargement s'est interrompu. Pour pouvoir générer des artefacts locaux sans bloquer le projet, une configuration rapide a été ajoutée :
+- `requirements.txt` installe maintenant le pipeline principal ;
+- `requirements-notebooks.txt` porte la dépendance `jupyter`, laissée optionnelle à cause des chemins Windows trop longs sur cette machine.
+
+## Pourquoi il y a deux configs locales de validation
+
+### 1. Config rapide
 
 ```text
 config_quick.yaml
@@ -53,13 +59,36 @@ Elle utilise :
 - images redimensionnées à 64 ;
 - 1 epoch ;
 - sous-échantillon de 512 images train, 128 validation, 128 test ;
-- modèles non pré-entraînés dans cette configuration rapide.
+- modèles non pré-entraînés dans cette config rapide.
 
-Important : ces résultats rapides servent à vérifier le pipeline et produire des artefacts, pas à conclure scientifiquement sur les performances.
+Objectif :
 
-## Runs rapides exécutés
+- prouver que tout le pipeline tourne localement ;
+- générer des checkpoints, figures et traces MLflow.
 
-Commande utilisée :
+### 2. Config CPU intermédiaire
+
+```text
+config_cpu_medium.yaml
+```
+
+Elle utilise :
+
+- ChestMNIST 64 ;
+- images redimensionnées à 128 ;
+- 3 epochs ;
+- sous-échantillon de 4096 images train, 512 validation, 512 test ;
+- ResNet18 pré-entraîné ;
+- autoencodeur plus long que le quick run.
+
+Objectif :
+
+- produire des résultats plus crédibles que les quick runs sur CPU ;
+- sans prétendre remplacer un entraînement complet GPU.
+
+## Runs exécutés sur cette machine
+
+### Runs rapides
 
 ```bash
 .venv\Scripts\python.exe -m src.training.train_supervised --model simple_cnn --config config_quick.yaml
@@ -70,74 +99,112 @@ Commande utilisée :
 
 Résultats rapides obtenus :
 
-| Run | Test loss | F1 macro | Précision macro | Rappel macro | Seuil AE | Taux atypique test |
-|---|---:|---:|---:|---:|---:|---:|
-| simple_cnn | 0.4738 | 0.0000 | 0.0000 | 0.0000 | - | - |
-| transfer | 0.2382 | 0.0000 | 0.0000 | 0.0000 | - | - |
-| vit | 0.1717 | 0.0000 | 0.0000 | 0.0000 | - | - |
-| autoencoder | - | - | - | - | 0.0738 | 0.0547 |
+| Run         | Test loss | F1 macro | Précision macro | Rappel macro | Seuil AE | Taux atypique test |
+| ----------- | --------: | -------: | --------------: | -----------: | -------: | -----------------: |
+| simple_cnn  |    0.4739 |   0.0000 |          0.0000 |       0.0000 |        - |                  - |
+| transfer    |    0.2394 |   0.0000 |          0.0000 |       0.0000 |        - |                  - |
+| vit         |    0.1717 |   0.0000 |          0.0000 |       0.0000 |        - |                  - |
+| autoencoder |         - |        - |               - |            - |   0.0738 |             0.0547 |
 
 Les AUC macro sont non définies sur ce très petit sous-échantillon parce que certaines classes n'ont qu'une seule valeur dans le test. C'est normal pour un run rapide, et c'est une raison de ne pas présenter ces résultats comme résultats finaux.
 
+### Runs CPU intermédiaires
+
+```bash
+.venv\Scripts\python.exe -m src.training.train_supervised --model transfer --config config_cpu_medium.yaml
+.venv\Scripts\python.exe -m src.training.train_autoencoder --config config_cpu_medium.yaml
+```
+
+Résultats CPU intermédiaires obtenus :
+
+| Run         | Test loss | AUC macro test | F1 macro | Précision macro | Rappel macro | Seuil AE | Taux atypique test |
+| ----------- | --------: | -------------: | -------: | --------------: | -----------: | -------: | -----------------: |
+| transfer    |    0.1794 |         0.6727 |   0.0022 |          0.0102 |       0.0012 |        - |                  - |
+| autoencoder |         - |              - |        - |               - |            - | 0.000611 |             0.0645 |
+
+Interprétation :
+
+- le run `transfer` commence à donner une AUC macro exploitable, mais le seuil 0.5 reste trop conservateur sur ce sous-échantillon, d'où un F1 quasi nul ;
+- l'autoencodeur intermédiaire produit un seuil beaucoup plus stable et des erreurs de reconstruction nettement plus faibles que dans le quick run ;
+- ces runs sont plus crédibles techniquement que la config rapide, mais restent insuffisants pour une conclusion expérimentale finale.
+
 ## Artefacts générés localement
 
-Les fichiers suivants existent localement dans `outputs_quick/` :
+### ChestMNIST quick
 
-- `best_simple_cnn.pt`
-- `best_transfer.pt`
-- `best_vit.pt`
-- `best_autoencoder.pt`
-- figures ROC/AUC par modèle supervisé ;
-- figure de reconstructions de l'autoencodeur.
+- `outputs_quick/best_simple_cnn.pt`
+- `outputs_quick/best_transfer.pt`
+- `outputs_quick/best_vit.pt`
+- `outputs_quick/best_autoencoder.pt`
+- figures ROC/AUC par modèle supervisé
+- figure de reconstructions de l'autoencodeur
+- traces MLflow dans `mlruns_quick/`
 
-Les traces MLflow rapides existent localement dans :
+### ChestMNIST CPU intermédiaire
 
-```text
-mlruns_quick/
-```
+- `outputs_cpu_medium/best_transfer.pt`
+- `outputs_cpu_medium/best_autoencoder.pt`
+- figures ROC/AUC pour `transfer`
+- figure de reconstructions AE
+- traces MLflow dans `mlruns_cpu_medium/`
 
-Ces dossiers ne sont pas poussés sur GitHub pour éviter d'ajouter des fichiers lourds. Ils peuvent être transmis séparément si nécessaire.
+### OpenI texte seul
 
-## Ce qui reste à faire pour un rendu final solide
+- `data/openi/openi_prepared.csv`
+- `outputs_openi_text/best_openi_text.pt`
+- traces MLflow dans `mlruns_openi_text/`
 
-Pour un vrai rendu expérimental, il faut lancer les entraînements complets, idéalement sur GPU ou avec plus de temps :
+## OpenI texte seul exécuté
 
-```bash
-.venv\Scripts\python.exe -m src.training.train_supervised --model simple_cnn --config config.yaml
-.venv\Scripts\python.exe -m src.training.train_supervised --model transfer --config config.yaml
-.venv\Scripts\python.exe -m src.training.train_supervised --model vit --config config.yaml
-.venv\Scripts\python.exe -m src.training.train_autoencoder --config config.yaml
-```
-
-Pour OpenI, il faut préparer le CSV local :
-
-```text
-data/openi/openi_prepared.csv
-```
-
-Un script officiel a été ajouté :
+Commande utilisée :
 
 ```bash
-.venv\Scripts\python.exe -m src.data.prepare_openi_official
+.venv\Scripts\python.exe -m src.data.prepare_openi_official --reports-only
+.venv\Scripts\python.exe -m src.training.train_text --config config_openi_text.yaml
 ```
-
-Il utilise les archives OpenI/NLM `NLMCXR_reports.tgz` et `NLMCXR_png.tgz`. Lors du test du 29 mai 2026, le téléchargement officiel des rapports a fonctionné et a produit `data/openi/openi_prepared.csv` avec 7470 lignes image-rapport. Un modèle texte seul TF-IDF + MLP a été entraîné sur 4 labels OpenI : Atelectasis, Cardiomegaly, Effusion et Pleural.
 
 Résultat texte OpenI :
 
-| Modèle | AUC macro test | F1 macro test | Précision macro | Rappel macro | Loss test |
-|---|---:|---:|---:|---:|---:|
-| TF-IDF + MLP | 0.9685 | 0.4965 | 0.9310 | 0.3591 | 0.1148 |
+| Modèle       | AUC macro test | F1 macro test | Précision macro | Rappel macro | Loss test |
+| ------------ | -------------: | ------------: | --------------: | -----------: | --------: |
+| TF-IDF + MLP |        0.96845 |       0.49645 |         0.93095 |      0.35906 |   0.11480 |
 
-Le téléchargement officiel des images PNG a été tenté, mais il a dépassé 30 minutes. Les images OpenI restent donc à télécharger/extracter si on veut entraîner `train_multimodal.py`.
+Les images PNG OpenI n'ont pas encore été téléchargées ici. Donc `train_multimodal.py` et la comparaison image seule OpenI / multimodal OpenI restent à lancer.
 
-Puis renseigner `openi.label_columns` dans `config.yaml` avant de lancer :
+## Démonstrateur testé
+
+Un smoke test Streamlit a été fait en local :
 
 ```bash
-.venv\Scripts\python.exe -m src.training.train_text --config config.yaml
-.venv\Scripts\python.exe -m src.training.train_multimodal --config config.yaml
+python -m streamlit run src/app/streamlit_app.py --server.headless true --server.port 8502
 ```
+
+Résultat :
+
+- l'application démarre ;
+- la réponse HTTP locale est `200`.
+
+## Ce qui reste à faire pour un rendu final très solide
+
+- lancer des entraînements plus longs, idéalement sur GPU ;
+- produire au moins une comparaison supervisée plus robuste que les sous-échantillons CPU ;
+- télécharger/extracter les PNG OpenI ;
+- lancer `train_multimodal.py` avec `config_openi_multimodal.yaml` pour avoir une vraie comparaison image seule / texte seul / multimodal sur OpenI ;
+- ajouter des captures MLflow et Streamlit si demandées ;
+- exécuter ou capturer les notebooks si le professeur veut des preuves notebook explicites.
 
 ## À dire si on rend maintenant
 
-Le code et les livrables sont complets. Les résultats rapides prouvent que le pipeline tourne localement. En revanche, les métriques rapides ne doivent pas être interprétées comme performances finales, car elles sont obtenues sur un sous-échantillon CPU très réduit.
+Le code et les livrables sont complets, les artefacts locaux existent réellement sur cette machine, et le pipeline est démontré de bout en bout :
+
+- ChestMNIST téléchargé et entraînements exécutés ;
+- checkpoints et traces MLflow présents ;
+- Streamlit validé ;
+- OpenI texte seul exécuté ;
+- rapport et exports mis à jour avec de vraies métriques.
+
+En revanche, il faut rester honnête :
+
+- les quick runs ne sont pas des résultats finaux ;
+- les runs CPU intermédiaires sont des résultats partiels plus crédibles, mais pas encore un benchmark final ;
+- la multimodalité image + texte OpenI complète reste à finir.

@@ -18,14 +18,15 @@ from src.data.transforms import get_rgb_transforms
 from src.models.multimodal_model import MultimodalFusionModel
 from src.models.transfer_model import ImageEncoder
 from src.training.evaluate import evaluate_multilabel
+from src.utils.early_stopping import is_improved, parse_early_stopping, resolve_monitor_value
 from src.utils.mlflow_utils import log_config, log_metrics_dict, setup_mlflow
 from src.utils.seed import get_device, set_seed
 
 
 class ImageOnlyOpenI(nn.Module):
-    def __init__(self, num_classes: int):
+    def __init__(self, num_classes: int, encoder_name: str, pretrained: bool):
         super().__init__()
-        self.encoder = ImageEncoder(embedding_dim=128, pretrained=True)
+        self.encoder = ImageEncoder(embedding_dim=128, name=encoder_name, pretrained=pretrained)
         self.classifier = nn.Linear(128, num_classes)
 
     def forward(self, image):
@@ -49,6 +50,25 @@ def train_epoch(model, loader, optimizer, criterion, device, mode):
     return total_loss / max(len(loader), 1)
 
 
+def resolve_openi_image_path(raw_path: str, csv_parent: Path, repo_root: Path) -> Path:
+    path = Path(str(raw_path))
+    if path.is_absolute():
+        return path
+    candidate = csv_parent / path
+    if candidate.exists():
+        return candidate
+    repo_candidate = repo_root / path
+    if repo_candidate.exists():
+        return repo_candidate
+    parts = path.parts
+    for idx in range(len(parts) - 1):
+        if parts[idx].lower() == "data" and parts[idx + 1].lower() == "openi":
+            repo_candidate = repo_root / Path(*parts[idx:])
+            if repo_candidate.exists():
+                return repo_candidate
+    return candidate
+
+
 def make_openi_loaders(config):
     csv_path = config["paths"]["openi_csv"]
     label_columns = config["openi"]["label_columns"]
@@ -57,10 +77,26 @@ def make_openi_loaders(config):
 
     df = pd.read_csv(csv_path)
     csv_parent = Path(csv_path).parent
+    repo_root = Path(__file__).resolve().parents[2]
     image_column = config["openi"]["image_column"]
     df[image_column] = df[image_column].apply(
-        lambda p: str(Path(p)) if Path(str(p)).is_absolute() else str((csv_parent / str(p)).resolve())
+        lambda p: str(resolve_openi_image_path(p, csv_parent, repo_root).resolve())
     )
+    drop_missing = config["openi"].get("drop_missing_images", False)
+    image_paths = df[image_column].apply(lambda p: Path(p))
+    missing_mask = ~image_paths.apply(lambda p: p.exists())
+    missing_count = int(missing_mask.sum())
+    if missing_count:
+        if drop_missing:
+            df = df.loc[~missing_mask].reset_index(drop=True)
+        else:
+            example = image_paths[missing_mask].iloc[0]
+            raise FileNotFoundError(
+                f"Missing {missing_count} OpenI images (e.g. {example}). "
+                "Download/extract the PNG archive or set openi.drop_missing_images to true."
+            )
+    if df.empty:
+        raise RuntimeError("OpenI dataset is empty after filtering missing images.")
     train_df, temp_df = train_test_split(df, test_size=0.3, random_state=config["seed"])
     val_df, test_df = train_test_split(temp_df, test_size=0.5, random_state=config["seed"])
 
@@ -113,6 +149,9 @@ def run_model(model, mode, loaders, config, device, vectorizer=None):
     criterion = nn.BCEWithLogitsLoss()
     best_val_auc = -1.0
     best_path = Path(config["paths"]["output_dir"]) / f"best_openi_{mode}.pt"
+    early = parse_early_stopping(config, default_monitor="val_auc_macro")
+    early_best = None
+    early_bad_epochs = 0
 
     for epoch in range(config["openi"]["epochs"]):
         train_loss = train_epoch(model, loaders["train"], optimizer, criterion, device, mode)
@@ -131,6 +170,16 @@ def run_model(model, mode, loaders, config, device, vectorizer=None):
                 },
                 best_path,
             )
+        if early:
+            monitor_value = resolve_monitor_value(val_metrics, early["monitor"])
+            if monitor_value is not None:
+                if is_improved(monitor_value, early_best, early["monitor"], early["min_delta"]):
+                    early_best = monitor_value
+                    early_bad_epochs = 0
+                else:
+                    early_bad_epochs += 1
+                if early_bad_epochs >= early["patience"]:
+                    break
 
     model.load_state_dict(torch.load(best_path, map_location=device)["model_state_dict"])
     test_metrics, _, _, _ = evaluate_multilabel(model, loaders["test"], device, threshold=0.5, input_mode=mode)
@@ -162,14 +211,21 @@ def main():
         })
         log_config(args.config)
         num_classes = len(config["openi"]["label_columns"])
+        encoder_name = config["models"].get("transfer_name", "resnet18")
+        pretrained = bool(config["models"].get("pretrained", True))
 
-        image_model = ImageOnlyOpenI(num_classes=num_classes).to(device)
+        image_model = ImageOnlyOpenI(
+            num_classes=num_classes,
+            encoder_name=encoder_name,
+            pretrained=pretrained,
+        ).to(device)
         run_model(image_model, "image", loaders, config, device)
 
         multimodal_model = MultimodalFusionModel(
             tfidf_dim=len(vectorizer.vocabulary_),
             num_classes=num_classes,
-            pretrained_image=True,
+            image_encoder_name=encoder_name,
+            pretrained_image=pretrained,
         ).to(device)
         run_model(multimodal_model, "multimodal", loaders, config, device, vectorizer=vectorizer)
         vectorizer_path = Path(config["paths"]["output_dir"]) / "openi_tfidf_vectorizer.joblib"

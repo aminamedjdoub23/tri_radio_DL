@@ -1,5 +1,5 @@
 tags.mlflow.runName,metrics.test_loss,metrics.test_f1_macro,metrics.test_precision_macro,metrics.test_recall_macro,metrics.anomaly_threshold,metrics.test_all_anomaly_rate,metrics.test_all_reconstruction_mse_mean,metrics.test_normal_reconstruction_mse_mean
-chestmnist_autoencoder,,,,,0.0737778153270483,0.0546875,0.04866917620529421,0.05006585175792376
-chestmnist_vit,0.17166319489479065,0.0,0.0,0.0,,,,
-chestmnist_transfer,0.23823922127485275,0.0,0.0,0.0,,,,
-chestmnist_simple_cnn,0.47375788539648056,0.0,0.0,0.0,,,,
+chestmnist_autoencoder,,,,,0.073777811601758,0.0546875,0.04866917643812485,0.0500658518075943
+chestmnist_vit,0.17166315391659737,0.0,0.0,0.0,,,,
+chestmnist_transfer,0.23936127871274948,0.0,0.0,0.0,,,,
+chestmnist_simple_cnn,0.47386473417282104,0.0,0.0,0.0,,,,

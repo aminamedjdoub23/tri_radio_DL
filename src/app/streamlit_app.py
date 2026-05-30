@@ -35,6 +35,13 @@ def build_classifier(model_name, config):
     raise ValueError(f"Modèle inconnu: {model_name}")
 
 
+def first_existing(*paths: Path) -> Path:
+    for path in paths:
+        if path.exists():
+            return path
+    return paths[0]
+
+
 @st.cache_resource
 def load_models(supervised_path, ae_path, multimodal_path, vectorizer_path):
     config = load_config()
@@ -79,10 +86,27 @@ st.warning(
 )
 
 config = load_config()
-default_model = ROOT / config["paths"]["output_dir"] / "best_simple_cnn.pt"
-default_ae = ROOT / config["paths"]["output_dir"] / "best_autoencoder.pt"
-default_multimodal = ROOT / config["paths"]["output_dir"] / "best_openi_multimodal.pt"
-default_vectorizer = ROOT / config["paths"]["output_dir"] / "openi_tfidf_vectorizer.joblib"
+default_model = first_existing(
+    ROOT / config["paths"]["output_dir"] / "best_simple_cnn.pt",
+    ROOT / "outputs_cpu_medium" / "best_transfer.pt",
+    ROOT / "outputs_quick" / "best_simple_cnn.pt",
+    ROOT / "outputs_quick" / "best_transfer.pt",
+)
+default_ae = first_existing(
+    ROOT / config["paths"]["output_dir"] / "best_autoencoder.pt",
+    ROOT / "outputs_cpu_medium" / "best_autoencoder.pt",
+    ROOT / "outputs_quick" / "best_autoencoder.pt",
+)
+default_multimodal = first_existing(
+    ROOT / config["paths"]["output_dir"] / "best_openi_multimodal.pt",
+    ROOT / "outputs_openi_multimodal" / "best_openi_multimodal.pt",
+    ROOT / "outputs_openi_text" / "best_openi_multimodal.pt",
+)
+default_vectorizer = first_existing(
+    ROOT / config["paths"]["output_dir"] / "openi_tfidf_vectorizer.joblib",
+    ROOT / "outputs_openi_multimodal" / "openi_tfidf_vectorizer.joblib",
+    ROOT / "outputs_openi_text" / "openi_tfidf_vectorizer.joblib",
+)
 
 with st.sidebar:
     st.header("Modèles")

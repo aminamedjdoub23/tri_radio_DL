@@ -1,0 +1,47 @@
+seed: 42
+device: auto
+
+paths:
+  data_root: data/raw
+  output_dir: outputs_cpu_medium
+  mlflow_uri: mlruns_cpu_medium
+  openi_csv: data/openi/openi_prepared.csv
+
+chestmnist:
+  medmnist_size: 64
+  size: 128
+  batch_size: 16
+  num_workers: 0
+  epochs: 3
+  lr: 0.001
+  weight_decay: 0.0001
+  threshold: 0.5
+  max_samples:
+    train: 4096
+    val: 512
+    test: 512
+
+models:
+  transfer_name: resnet18
+  vit_name: vit_tiny_patch16_224
+  pretrained: true
+
+autoencoder:
+  epochs: 3
+  lr: 0.001
+  batch_size: 16
+  normal_strategy: no_finding
+  anomaly_percentile: 95
+
+openi:
+  image_size: 128
+  batch_size: 16
+  epochs: 3
+  lr: 0.001
+  max_tfidf_features: 2000
+  text_column: report
+  image_column: image_path
+  label_columns: []
+
+mlflow:
+  experiment_name: tri_radiologique_chestmnist_cpu_medium
