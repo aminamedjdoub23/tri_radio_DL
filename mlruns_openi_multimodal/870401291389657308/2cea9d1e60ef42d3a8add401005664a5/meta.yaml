@@ -1,5 +1,5 @@
 artifact_uri: file:C:/Users/Héctor/OneDrive/Desktop/Projects/EFREI/M1-DE/ML-DL/tri_radio_DL/mlruns_openi_multimodal/870401291389657308/2cea9d1e60ef42d3a8add401005664a5/artifacts
-end_time: null
+end_time: 1780159226171
 entry_point_name: ''
 experiment_id: '870401291389657308'
 lifecycle_stage: active
@@ -9,6 +9,6 @@ source_name: ''
 source_type: 4
 source_version: ''
 start_time: 1780154229737
-status: 1
+status: 3
 tags: []
 user_id: Héctor
