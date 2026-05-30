@@ -153,7 +153,9 @@ def run_model(model, mode, loaders, config, device, vectorizer=None):
     early_best = None
     early_bad_epochs = 0
 
-    for epoch in range(config["openi"]["epochs"]):
+    epochs = config["openi"]["epochs"]
+    for epoch in range(epochs):
+        print(f"{mode} epoch {epoch + 1}/{epochs}")
         train_loss = train_epoch(model, loaders["train"], optimizer, criterion, device, mode)
         val_metrics, _, _, _ = evaluate_multilabel(model, loaders["val"], device, threshold=0.5, input_mode=mode)
         mlflow.log_metric(f"{mode}_train_loss", train_loss, step=epoch)

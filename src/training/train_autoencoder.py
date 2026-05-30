@@ -71,7 +71,9 @@ def main():
         })
         log_config(args.config)
 
-        for epoch in range(config["autoencoder"]["epochs"]):
+        epochs = config["autoencoder"]["epochs"]
+        for epoch in range(epochs):
+            print(f"Epoch {epoch + 1}/{epochs}")
             train_loss = train_epoch(model, loaders["train"], optimizer, criterion, device)
             val_errors = reconstruction_errors(model, loaders["val"], device)
             val_loss = float(np.mean(val_errors))

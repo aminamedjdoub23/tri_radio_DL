@@ -106,7 +106,9 @@ def main():
         })
         log_config(args.config)
 
-        for epoch in range(config["openi"]["epochs"]):
+        epochs = config["openi"]["epochs"]
+        for epoch in range(epochs):
+            print(f"Epoch {epoch + 1}/{epochs}")
             train_loss = train_epoch(model, loaders["train"], optimizer, criterion, device)
             val_metrics, _, _, _ = evaluate_text_tensor(model, loaders["val"], device, threshold=0.5)
             mlflow.log_metric("train_loss", train_loss, step=epoch)

@@ -102,7 +102,9 @@ def main():
         })
         log_config(args.config)
 
-        for epoch in range(config["chestmnist"]["epochs"]):
+        epochs = config["chestmnist"]["epochs"]
+        for epoch in range(epochs):
+            print(f"Epoch {epoch + 1}/{epochs}")
             train_loss = train_epoch(model, loaders["train"], optimizer, criterion, device)
             val_metrics, val_auc_per_class, _, _ = evaluate_multilabel(
                 model, loaders["val"], device, threshold=config["chestmnist"]["threshold"]
