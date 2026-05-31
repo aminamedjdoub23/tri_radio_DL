@@ -19,3 +19,9 @@ mlruns_openi_text/
 *.png
 *.jpg
 *.jpeg
+
+# img_report should not be ignored as it contains the report images
+!img_report/
+!img_report/**/*.png
+!img_report/**/*.jpg
+!img_report/**/*.jpeg
