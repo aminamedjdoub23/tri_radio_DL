@@ -37,7 +37,7 @@ Configuration et contraintes de calcul utilisées pour les runs rapides locaux :
 | ------------------------------------ | ------------------------------------ |
 | Machine utilisée                     | Ordinateur local Windows             |
 | CPU                                  | AMD64 Family 25 Model 68             |
-| GPU                                  | CUDA non disponible                  |
+| GPU                                  | NVIDIA GeForce GTX 1650 Ti           |
 | RAM                                  | Non relevée                          |
 | Version Python                       | 3.13.1                               |
 | Version PyTorch                      | 2.12.0+cpu                           |
@@ -54,12 +54,14 @@ Pour améliorer la crédibilité expérimentale sur une machine sans GPU, une co
 
 Les choix d'optimisation restent simples : AdamW pour les modèles supervisés, Adam pour l'autoencodeur, batch size modéré, dropout dans les classifieurs et weight decay pour limiter le surapprentissage. Le meilleur modèle est sauvegardé selon la métrique de validation. Aucun scheduler complexe n'est imposé, car l'objectif est de garder un pipeline lisible et reproductible.
 
+Un run final a ensuite été lancé sur GPU avec `config_final.yaml` (CUDA disponible), afin d'obtenir des métriques plus robustes qu'en CPU.
+
 ## 5. Modélisation supervisée image
 
 Trois architectures sont comparées :
 
 - CNN simple entraîné depuis zéro : baseline légère, facile à comprendre et rapide à entraîner.
-- ResNet18 pré-entraîné : transfert d'apprentissage classique, utile pour comparer avec un modèle ayant déjà appris des motifs visuels généraux.
+- ResNet18 ou DenseNet121 pré-entraîné : transfert d'apprentissage classique, utile pour comparer avec un modèle ayant déjà appris des motifs visuels généraux.
 - ViT compact via `timm` : modèle à attention demandé par la consigne, choisi en version petite pour rester faisable.
 
 Les trois modèles produisent 14 logits. La sigmoïde est appliquée uniquement pour les métriques et l'affichage des probabilités, pas avant la loss.
@@ -82,6 +84,12 @@ Résultat plus complet obtenu localement avec `config_cpu_medium.yaml` pour le m
 
 Cette ligne ne doit pas être lue comme un résultat final robuste. Elle montre seulement qu'en passant d'un quick run purement technique à un run CPU intermédiaire, le modèle commence à produire une AUC exploitable, même si le seuil par défaut 0.5 reste trop strict pour obtenir un F1 élevé.
 
+Résultat obtenu avec `config_final.yaml` (GPU) pour le modèle de transfert :
+
+| Modèle               | AUC macro test | F1 macro test | Précision macro | Rappel macro | Loss test | Commentaire            |
+| -------------------- | -------------: | ------------: | --------------: | -----------: | --------: | ---------------------- |
+| Transfer final (GPU) |         0.8170 |        0.1166 |          0.3938 |       0.0779 |    0.1544 | DenseNet121, 30 epochs |
+
 ## 6. Détection d'anomalies
 
 La détection d'anomalies est réalisée avec un autoencodeur convolutionnel. Le modèle apprend à reconstruire des images considérées comme normales, définies ici comme les radiographies sans label positif. Cette stratégie est simple à expliquer : l'AE apprend une reconstruction de cas sans pathologie annotée, puis une image mal reconstruite est considérée comme atypique pour le modèle.
@@ -89,6 +97,10 @@ La détection d'anomalies est réalisée avec un autoencodeur convolutionnel. Le
 Le score d'anomalie est l'erreur moyenne de reconstruction MSE. Le seuil est fixé au percentile 95 des erreurs sur la validation normale. Ce seuil est simple, reproductible et défendable, mais il ne correspond pas à une validation clinique.
 
 Le script sauvegarde aussi une figure d'exemples original/reconstruction dans MLflow. Elle sert à vérifier visuellement que l'autoencodeur apprend une reconstruction plausible et à discuter les limites du score.
+
+Exemple de reconstructions (run CPU intermédiaire) :
+
+![Reconstructions AE](../outputs_cpu_medium/autoencoder_reconstructions.png)
 
 Résultats obtenus avec `config_quick.yaml` :
 
@@ -117,7 +129,7 @@ Le changement d'échelle du score entre quick et CPU intermédiaire vient du fai
 
 La preuve de concept multimodale utilise OpenI avec un CSV préparé localement. Le projet compare :
 
-- image seule : encodeur ResNet18 puis classifieur ;
+- image seule : encodeur ResNet18 ou DenseNet121 puis classifieur ;
 - texte seul : TF-IDF puis MLP ;
 - fusion multimodale : concaténation des embeddings image et texte.
 
@@ -127,9 +139,9 @@ Tableau à compléter si OpenI est préparé :
 
 | Modèle OpenI | AUC macro test | F1 macro test | Commentaire                               |
 | ------------ | -------------: | ------------: | ----------------------------------------- |
-| Image seule  |    À compléter |   À compléter | Baseline visuelle                         |
+| Image seule  |         0.8652 |        0.4073 | Baseline visuelle                         |
 | Texte seul   |         0.9685 |        0.4965 | TF-IDF + MLP sur rapports OpenI officiels |
-| Multimodal   |    À compléter |   À compléter | Fusion image + texte                      |
+| Multimodal   |         0.9817 |        0.7738 | Fusion image + texte                      |
 
 L'entraînement OpenI image seule + multimodal se lance avec :
 
@@ -139,7 +151,7 @@ python -m src.training.train_multimodal --config config_openi_multimodal.yaml
 
 Il génère `best_openi_image.pt`, `best_openi_multimodal.pt` et `openi_tfidf_vectorizer.joblib` dans le dossier de sortie configuré. Les images PNG doivent être présentes localement pour que le script s'exécute.
 
-La partie OpenI texte seul a été exécutée localement après téléchargement officiel des rapports NLM/OpenI. Le CSV `data/openi/openi_prepared.csv` contient 7470 lignes image-rapport. Le téléchargement officiel des images PNG a été tenté, mais il a dépassé le temps disponible ; les modèles image seule OpenI et multimodal image + texte restent donc à lancer lorsque les images sont entièrement disponibles.
+La partie OpenI texte seul a été exécutée localement après téléchargement officiel des rapports NLM/OpenI. Le CSV `data/openi/openi_prepared.csv` contient 7470 lignes image-rapport. Les images PNG officielles ont été téléchargées et l'entraînement OpenI image seule + multimodal a été exécuté localement.
 
 ## 8. Évaluation
 
@@ -153,9 +165,18 @@ Les métriques principales sont :
 
 Les courbes ROC sont sauvegardées comme artefacts MLflow pour la partie ChestMNIST supervisée.
 
+Exemples de figures générées lors du run final :
+
+![AUC par classe](../outputs_final/transfer_auc_per_class.png)
+![ROC multi-classes](../outputs_final/transfer_roc_curves.png)
+
 Un export synthétique des runs rapides est disponible dans `report/mlflow_quick_results.csv`. Les artefacts complets MLflow sont générés localement dans `mlruns_quick/`.
 
+Un export synthétique du run final GPU est disponible dans `report/mlflow_final_results.csv`. Les artefacts complets MLflow sont générés localement dans `mlruns_final/`.
+
 Un export du run texte OpenI est disponible dans `report/openi_text_results.csv`. Les artefacts MLflow correspondants sont générés localement dans `mlruns_openi_text/`.
+
+Un export du run OpenI multimodal est disponible dans `report/openi_multimodal_results.csv`. Les artefacts MLflow correspondants sont générés localement dans `mlruns_openi_multimodal/`.
 
 ## 9. Tracking MLflow
 
@@ -174,11 +195,13 @@ Après entraînement, l'interface MLflow se lance avec :
 mlflow ui --backend-store-uri mlruns
 ```
 
-En pratique, sur cette machine, trois ensembles de traces existent localement :
+En pratique, sur cette machine, cinq ensembles de traces existent localement :
 
 - `mlruns_quick/` pour les runs rapides ChestMNIST ;
 - `mlruns_cpu_medium/` pour les runs CPU intermédiaires ;
 - `mlruns_openi_text/` pour le run texte OpenI.
+- `mlruns_openi_multimodal/` pour le run OpenI image seule + multimodal ;
+- `mlruns_final/` pour le run final GPU.
 
 ## 10. Démonstrateur
 
@@ -210,3 +233,8 @@ Les principales limites sont :
 Le projet propose une chaîne complète et défendable : classification multi-label image, comparaison de trois familles de modèles, détection d'images atypiques, preuve de concept multimodale, suivi MLflow et démonstrateur Streamlit.
 
 Les perspectives possibles sont une meilleure calibration des seuils, une validation externe, une analyse par classe plus poussée, et une préparation plus rigoureuse d'un dataset multimodal avec identifiants patients pour éviter toute fuite.
+
+## Annexes
+
+![alt text](image.png)
+![alt text](image-1.png)

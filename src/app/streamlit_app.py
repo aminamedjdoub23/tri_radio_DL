@@ -35,6 +35,29 @@ def build_classifier(model_name, config):
     raise ValueError(f"Modèle inconnu: {model_name}")
 
 
+def infer_image_encoder_name(state_dict, fallback):
+    for key in state_dict:
+        if key.startswith("image_encoder.backbone.features"):
+            return "densenet121"
+        if key.startswith("image_encoder.backbone.conv1") or key.startswith("image_encoder.backbone.layer"):
+            return "resnet18"
+    proj_weight = state_dict.get("image_encoder.projection.0.weight")
+    if proj_weight is not None and len(proj_weight.shape) == 2:
+        in_features = proj_weight.shape[1]
+        if in_features == 1024:
+            return "densenet121"
+        if in_features == 512:
+            return "resnet18"
+    return fallback
+
+
+def infer_embedding_dim(state_dict, fallback=128):
+    proj_weight = state_dict.get("image_encoder.projection.0.weight")
+    if proj_weight is not None and len(proj_weight.shape) == 2:
+        return int(proj_weight.shape[0])
+    return fallback
+
+
 def first_existing(*paths: Path) -> Path:
     for path in paths:
         if path.exists():
@@ -50,7 +73,8 @@ def load_models(supervised_path, ae_path, multimodal_path, vectorizer_path):
     classifier, class_ckpt = None, None
     if supervised_path and Path(supervised_path).exists():
         class_ckpt = torch.load(supervised_path, map_location=device)
-        classifier = build_classifier(class_ckpt.get("model_name", "simple_cnn"), config).to(device)
+        class_config = class_ckpt.get("config", config)
+        classifier = build_classifier(class_ckpt.get("model_name", "simple_cnn"), class_config).to(device)
         classifier.load_state_dict(class_ckpt["model_state_dict"])
         classifier.eval()
 
@@ -67,9 +91,15 @@ def load_models(supervised_path, ae_path, multimodal_path, vectorizer_path):
         vectorizer = joblib_load(vectorizer_path)
         label_columns = multimodal_ckpt.get("label_columns", config["openi"]["label_columns"])
         tfidf_dim = multimodal_ckpt.get("tfidf_dim") or len(vectorizer.vocabulary_)
+        mm_state = multimodal_ckpt.get("model_state_dict", {})
+        fallback_encoder = config["models"].get("transfer_name", "resnet18")
+        image_encoder_name = multimodal_ckpt.get("image_encoder_name") or infer_image_encoder_name(mm_state, fallback_encoder)
+        embedding_dim = multimodal_ckpt.get("embedding_dim") or infer_embedding_dim(mm_state, 128)
         multimodal = MultimodalFusionModel(
             tfidf_dim=tfidf_dim,
             num_classes=len(label_columns),
+            embedding_dim=embedding_dim,
+            image_encoder_name=image_encoder_name,
             pretrained_image=False,
         ).to(device)
         multimodal.load_state_dict(multimodal_ckpt["model_state_dict"])

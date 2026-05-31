@@ -1,0 +1,2 @@
+tags.mlflow.runName,metrics.image_test_auc_macro,metrics.image_test_f1_macro,metrics.image_test_precision_macro,metrics.image_test_recall_macro,metrics.image_test_loss,metrics.multimodal_test_auc_macro,metrics.multimodal_test_f1_macro,metrics.multimodal_test_precision_macro,metrics.multimodal_test_recall_macro,metrics.multimodal_test_loss
+openi_image_vs_multimodal,0.8651872169444629,0.4072684554465382,0.44671203207649535,0.44281301368833326,0.23514858035134598,0.9817237168788796,0.773778516738935,0.8743738629172599,0.6950200044274342,0.08743537805521939

@@ -144,7 +144,7 @@ def selection_metric(metrics):
     return auc
 
 
-def run_model(model, mode, loaders, config, device, vectorizer=None):
+def run_model(model, mode, loaders, config, device, vectorizer=None, encoder_name=None, embedding_dim=None):
     optimizer = torch.optim.AdamW(model.parameters(), lr=config["openi"]["lr"])
     criterion = nn.BCEWithLogitsLoss()
     best_val_auc = -1.0
@@ -169,6 +169,8 @@ def run_model(model, mode, loaders, config, device, vectorizer=None):
                     "mode": mode,
                     "label_columns": config["openi"]["label_columns"],
                     "tfidf_dim": len(vectorizer.vocabulary_) if vectorizer is not None else None,
+                    "image_encoder_name": encoder_name,
+                    "embedding_dim": embedding_dim,
                 },
                 best_path,
             )
@@ -221,7 +223,16 @@ def main():
             encoder_name=encoder_name,
             pretrained=pretrained,
         ).to(device)
-        run_model(image_model, "image", loaders, config, device)
+        image_embedding_dim = image_model.encoder.projection[0].out_features
+        run_model(
+            image_model,
+            "image",
+            loaders,
+            config,
+            device,
+            encoder_name=encoder_name,
+            embedding_dim=image_embedding_dim,
+        )
 
         multimodal_model = MultimodalFusionModel(
             tfidf_dim=len(vectorizer.vocabulary_),
@@ -229,7 +240,17 @@ def main():
             image_encoder_name=encoder_name,
             pretrained_image=pretrained,
         ).to(device)
-        run_model(multimodal_model, "multimodal", loaders, config, device, vectorizer=vectorizer)
+        multimodal_embedding_dim = multimodal_model.image_encoder.projection[0].out_features
+        run_model(
+            multimodal_model,
+            "multimodal",
+            loaders,
+            config,
+            device,
+            vectorizer=vectorizer,
+            encoder_name=encoder_name,
+            embedding_dim=multimodal_embedding_dim,
+        )
         vectorizer_path = Path(config["paths"]["output_dir"]) / "openi_tfidf_vectorizer.joblib"
         dump(vectorizer, vectorizer_path)
         mlflow.log_artifact(str(vectorizer_path), artifact_path="models")

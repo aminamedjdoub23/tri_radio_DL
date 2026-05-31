@@ -169,7 +169,7 @@ Résultat texte OpenI :
 | ------------ | -------------: | ------------: | --------------: | -----------: | --------: |
 | TF-IDF + MLP |        0.96845 |       0.49645 |         0.93095 |      0.35906 |   0.11480 |
 
-Les images PNG OpenI n'ont pas encore été téléchargées ici. Donc `train_multimodal.py` et la comparaison image seule OpenI / multimodal OpenI restent à lancer.
+Les images PNG OpenI ont été téléchargées et `train_multimodal.py` a été exécuté, ce qui complète la comparaison image seule / texte seul / multimodal sur OpenI.
 
 ## Démonstrateur testé
 
@@ -188,8 +188,7 @@ Résultat :
 
 - lancer des entraînements plus longs, idéalement sur GPU ;
 - produire au moins une comparaison supervisée plus robuste que les sous-échantillons CPU ;
-- télécharger/extracter les PNG OpenI ;
-- lancer `train_multimodal.py` avec `config_openi_multimodal.yaml` pour avoir une vraie comparaison image seule / texte seul / multimodal sur OpenI ;
+- produire des runs finals pour simple CNN et ViT si un benchmark final est exigé ;
 - ajouter des captures MLflow et Streamlit si demandées ;
 - exécuter ou capturer les notebooks si le professeur veut des preuves notebook explicites.
 
@@ -200,11 +199,11 @@ Le code et les livrables sont complets, les artefacts locaux existent réellemen
 - ChestMNIST téléchargé et entraînements exécutés ;
 - checkpoints et traces MLflow présents ;
 - Streamlit validé ;
-- OpenI texte seul exécuté ;
+- OpenI texte seul et multimodal exécutés ;
 - rapport et exports mis à jour avec de vraies métriques.
 
 En revanche, il faut rester honnête :
 
 - les quick runs ne sont pas des résultats finaux ;
 - les runs CPU intermédiaires sont des résultats partiels plus crédibles, mais pas encore un benchmark final ;
-- la multimodalité image + texte OpenI complète reste à finir.
+- un benchmark final complet simple CNN / ViT reste à lancer si demandé.

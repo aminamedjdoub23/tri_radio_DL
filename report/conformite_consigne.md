@@ -12,47 +12,48 @@ Des résultats réellement obtenus localement existent maintenant pour :
 - un run CPU intermédiaire ResNet18 ;
 - un run CPU intermédiaire autoencodeur ;
 - un run OpenI texte seul.
+- un run OpenI image seule + multimodal ;
+- un run final GPU (transfer learning).
 
-La partie encore incomplète est la comparaison OpenI image seule / multimodal image + texte, qui dépend encore du téléchargement local des images PNG officielles.
+La comparaison OpenI image seule / multimodal image + texte a été exécutée localement après téléchargement des images PNG officielles.
 
 ## Correspondance exigence / implémentation
 
-| Exigence | Statut | Fichiers |
-|---|---|---|
-| ChestMNIST / ChestMNIST+ obligatoire | Couvert | `src/data/chestmnist_dataset.py`, `config.yaml` |
-| Classification multi-label 14 pathologies | Couvert | `src/models/*`, `src/training/train_supervised.py` |
-| Sigmoïde par classe + BCE | Couvert | `src/training/train_supervised.py`, `src/training/evaluate.py` |
-| CNN simple depuis zéro | Couvert | `src/models/simple_cnn.py` |
-| CNN pré-entraîné transfer learning | Couvert | `src/models/transfer_model.py` |
-| ViT ou hybride CNN/Transformer | Couvert | `src/models/vit_model.py` |
-| AE ou VAE pour anomalie | Couvert | `src/models/autoencoder.py`, `src/training/train_autoencoder.py` |
-| Score d'anomalie et seuil justifié | Couvert | seuil p95 validation dans `train_autoencoder.py` |
-| Exemples de reconstructions AE | Couvert | `src/utils/plots.py`, artefact MLflow |
-| Multimodal image + texte | Couvert | `src/training/train_text.py`, `src/training/train_multimodal.py` |
-| Comparer image seule / texte seul / multimodal | Couvert | `train_text.py`, `train_multimodal.py` |
-| Fusion justifiée | Couvert | `report/rapport.md` |
-| MLflow obligatoire | Couvert | scripts dans `src/training/` |
-| Paramètres, métriques, artefacts, figures, meilleurs modèles | Couvert | MLflow dans les scripts d'entraînement |
-| Démonstrateur applicatif | Couvert | `src/app/streamlit_app.py` |
-| Upload image, prédictions, score anomalie | Couvert | `streamlit_app.py` |
-| Texte complémentaire si multimodal disponible | Couvert | `streamlit_app.py` |
-| Train/validation/test propre | Couvert | splits MedMNIST et splits OpenI dans les scripts |
-| Seed fixe | Couvert | `src/utils/seed.py` |
-| Sauvegarde du meilleur modèle | Couvert | scripts d'entraînement |
-| Rapport structuré selon les sections imposées | Couvert | `report/rapport.md` |
-| README clair | Couvert | `README.md` |
-| Documentation matériel et temps | Partiellement couvert | tableau dans `report/rapport.md` |
+| Exigence                                                     | Statut                | Fichiers                                                         |
+| ------------------------------------------------------------ | --------------------- | ---------------------------------------------------------------- |
+| ChestMNIST / ChestMNIST+ obligatoire                         | Couvert               | `src/data/chestmnist_dataset.py`, `config.yaml`                  |
+| Classification multi-label 14 pathologies                    | Couvert               | `src/models/*`, `src/training/train_supervised.py`               |
+| Sigmoïde par classe + BCE                                    | Couvert               | `src/training/train_supervised.py`, `src/training/evaluate.py`   |
+| CNN simple depuis zéro                                       | Couvert               | `src/models/simple_cnn.py`                                       |
+| CNN pré-entraîné transfer learning                           | Couvert               | `src/models/transfer_model.py`                                   |
+| ViT ou hybride CNN/Transformer                               | Couvert               | `src/models/vit_model.py`                                        |
+| AE ou VAE pour anomalie                                      | Couvert               | `src/models/autoencoder.py`, `src/training/train_autoencoder.py` |
+| Score d'anomalie et seuil justifié                           | Couvert               | seuil p95 validation dans `train_autoencoder.py`                 |
+| Exemples de reconstructions AE                               | Couvert               | `src/utils/plots.py`, artefact MLflow                            |
+| Multimodal image + texte                                     | Couvert               | `src/training/train_text.py`, `src/training/train_multimodal.py` |
+| Comparer image seule / texte seul / multimodal               | Couvert               | `train_text.py`, `train_multimodal.py`                           |
+| Fusion justifiée                                             | Couvert               | `report/rapport.md`                                              |
+| MLflow obligatoire                                           | Couvert               | scripts dans `src/training/`                                     |
+| Paramètres, métriques, artefacts, figures, meilleurs modèles | Couvert               | MLflow dans les scripts d'entraînement                           |
+| Démonstrateur applicatif                                     | Couvert               | `src/app/streamlit_app.py`                                       |
+| Upload image, prédictions, score anomalie                    | Couvert               | `streamlit_app.py`                                               |
+| Texte complémentaire si multimodal disponible                | Couvert               | `streamlit_app.py`                                               |
+| Train/validation/test propre                                 | Couvert               | splits MedMNIST et splits OpenI dans les scripts                 |
+| Seed fixe                                                    | Couvert               | `src/utils/seed.py`                                              |
+| Sauvegarde du meilleur modèle                                | Couvert               | scripts d'entraînement                                           |
+| Rapport structuré selon les sections imposées                | Couvert               | `report/rapport.md`                                              |
+| README clair                                                 | Couvert               | `README.md`                                                      |
+| Documentation matériel et temps                              | Partiellement couvert | tableau dans `report/rapport.md`                                 |
 
 ## Points à compléter après exécution
 
 Ces éléments dépendent d'un entraînement réel et ne doivent pas être inventés :
 
-- résultats complets longue durée pour les trois modèles supervisés ;
-- résultats image seule OpenI et multimodal OpenI ;
+- résultats complets longue durée pour les trois modèles supervisés (simple CNN et ViT si un run final est requis) ;
 - captures MLflow si demandées ;
 - captures Streamlit si demandées ;
 - mesures plus fines de temps si un rendu très détaillé est attendu.
 
 ## Commentaire sur OpenI
 
-La consigne demande une composante multimodale si les données sont disponibles. Le projet prévoit OpenI avec un CSV préparé localement, et ce CSV a maintenant été généré sur cette machine à partir des rapports officiels NLM/OpenI. Tant que les images PNG OpenI ne sont pas entièrement téléchargées/extraites, la partie ChestMNIST reste la base exécutable complète et la partie OpenI image+texte reste une preuve de concept partiellement réalisée.
+La consigne demande une composante multimodale si les données sont disponibles. Le projet prévoit OpenI avec un CSV préparé localement, et ce CSV a maintenant été généré sur cette machine à partir des rapports officiels NLM/OpenI. Les images PNG OpenI ont été téléchargées et la preuve de concept image+texte a été exécutée localement.

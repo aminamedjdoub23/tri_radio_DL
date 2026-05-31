@@ -22,13 +22,14 @@ Le fichier a été téléchargé automatiquement via `medmnist` lors des entraî
 
 L'environnement principal a été créé dans `.venv`.
 
-| Élément     | Valeur                   |
-| ----------- | ------------------------ |
-| Python      | 3.13.1                   |
-| PyTorch     | 2.12.0+cpu               |
-| torchvision | 0.27.0+cpu               |
-| CUDA        | non disponible           |
-| CPU         | AMD64 Family 25 Model 68 |
+| Élément     | Valeur                        |
+| ----------- | ----------------------------- |
+| Python      | 3.13.1                        |
+| PyTorch     | non relevée (CUDA disponible) |
+| torchvision | non relevée                   |
+| CUDA        | disponible                    |
+| CPU         | AMD64 Family 25 Model 68      |
+| GPU         | NVIDIA GeForce GTX 1650 Ti    |
 
 Remarque :
 
@@ -46,6 +47,14 @@ Commandes exécutées :
 ```
 
 Résultat : syntaxe et imports OK.
+
+Vérification GPU :
+
+```bash
+.venv\Scripts\python.exe -c "import torch; print(torch.cuda.is_available()); print(torch.cuda.get_device_name(0))"
+```
+
+Résultat : CUDA disponible, GPU détecté.
 
 ## Smoke test Streamlit
 
@@ -181,9 +190,43 @@ Configuration prévue pour l'entraînement OpenI image seule + multimodal :
 config_openi_multimodal.yaml
 ```
 
+Entraînement OpenI image seule + multimodal exécuté :
+
+```bash
+.venv\Scripts\python.exe -m src.training.train_multimodal --config config_openi_multimodal.yaml
+```
+
+Artefacts générés :
+
+```text
+outputs_openi_multimodal/
+mlruns_openi_multimodal/
+```
+
+Checkpoints présents :
+
+- `outputs_openi_multimodal/best_openi_image.pt`
+- `outputs_openi_multimodal/best_openi_multimodal.pt`
+- `outputs_openi_multimodal/openi_tfidf_vectorizer.joblib`
+
+## Runs finaux GPU
+
+Un run final GPU a été exécuté avec :
+
+```text
+config_final.yaml
+```
+
+Artefacts générés :
+
+```text
+outputs_final/
+mlruns_final/
+```
+
 ## Limites
 
 - les quick runs prouvent le fonctionnement du pipeline, mais ne constituent pas des résultats finaux robustes ;
 - les runs CPU intermédiaires sont plus crédibles, mais restent des entraînements partiels sur sous-échantillon ;
-- les images PNG OpenI n'ont pas encore été téléchargées ici, donc `train_multimodal.py` n'a pas encore été exécuté sur cette machine ;
+- un benchmark final complet pour simple CNN et ViT reste à faire si demandé ;
 - les captures d'écran MLflow et Streamlit restent à faire si elles sont demandées dans le rendu final.
