@@ -100,7 +100,7 @@ Le script sauvegarde aussi une figure d'exemples original/reconstruction dans ML
 
 Exemple de reconstructions (run CPU intermédiaire) :
 
-![Reconstructions AE](../outputs_cpu_medium/autoencoder_reconstructions.png)
+![Reconstructions AE](../img_report/autoencoder_reconstructions.png)
 
 Résultats obtenus avec `config_quick.yaml` :
 
@@ -167,8 +167,8 @@ Les courbes ROC sont sauvegardées comme artefacts MLflow pour la partie ChestMN
 
 Exemples de figures générées lors du run final :
 
-![AUC par classe](../outputs_final/transfer_auc_per_class.png)
-![ROC multi-classes](../outputs_final/transfer_roc_curves.png)
+![AUC par classe](../img_report/transfer_auc_per_class.png)
+![ROC multi-classes](../img_report/transfer_roc_curves.png)
 
 Un export synthétique des runs rapides est disponible dans `report/mlflow_quick_results.csv`. Les artefacts complets MLflow sont générés localement dans `mlruns_quick/`.
 
@@ -236,5 +236,5 @@ Les perspectives possibles sont une meilleure calibration des seuils, une valida
 
 ## Annexes
 
-![alt text](image.png)
-![alt text](image-1.png)
+![alt text](../img_report/image.png)
+![alt text](../img_report/image-1.png)
