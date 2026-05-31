@@ -53,7 +53,9 @@ Preuves d'exécution locale :
 report/preuves_execution.md
 report/mlflow_quick_results.csv
 report/mlflow_cpu_medium_results.csv
+report/mlflow_final_results.csv
 report/openi_text_results.csv
+report/openi_multimodal_results.csv
 ```
 
 Le rapport est structuré selon les sections demandées :
@@ -71,11 +73,10 @@ Le rapport est structuré selon les sections demandées :
 - Analyse critique
 - Conclusion et perspectives
 
-À compléter éventuellement après entraînement plus long :
+À compléter éventuellement :
 
-- les captures MLflow ;
-- les captures du démonstrateur ;
-- les commentaires sur des performances finales plus robustes.
+- exécution ou captures des notebooks si demandées ;
+- mesures de temps plus fines si l'enseignant les exige.
 
 ## 3. Code source
 
@@ -206,7 +207,7 @@ python -m src.training.train_multimodal --config config_openi_multimodal.yaml
 - [x] Produire un run CPU intermédiaire `transfer + autoencoder`.
 - [x] Lancer MLflow et relever les métriques disponibles.
 - [x] Compléter les tableaux du rapport avec les vrais résultats disponibles.
-- [ ] Ajouter des captures MLflow et Streamlit si demandées.
+- [x] Ajouter des captures MLflow et Streamlit si demandées.
 - [x] Tester le démonstrateur via un smoke test de démarrage.
 - [ ] Vérifier que le dépôt GitHub est accessible au binôme.
 

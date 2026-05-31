@@ -13,9 +13,11 @@ Des résultats réellement obtenus localement existent maintenant pour :
 - un run CPU intermédiaire autoencodeur ;
 - un run OpenI texte seul.
 - un run OpenI image seule + multimodal ;
-- un run final GPU (transfer learning).
+- un run final GPU pour simple CNN, transfer learning et ViT.
 
 La comparaison OpenI image seule / multimodal image + texte a été exécutée localement après téléchargement des images PNG officielles.
+
+Des captures MLflow et Streamlit sont ajoutées en annexes du rapport.
 
 ## Correspondance exigence / implémentation
 
@@ -34,10 +36,12 @@ La comparaison OpenI image seule / multimodal image + texte a été exécutée l
 | Comparer image seule / texte seul / multimodal               | Couvert               | `train_text.py`, `train_multimodal.py`                           |
 | Fusion justifiée                                             | Couvert               | `report/rapport.md`                                              |
 | MLflow obligatoire                                           | Couvert               | scripts dans `src/training/`                                     |
+| Choix d'optimisation et régularisation documentés            | Couvert               | section Préparation dans `report/rapport.md`                     |
 | Paramètres, métriques, artefacts, figures, meilleurs modèles | Couvert               | MLflow dans les scripts d'entraînement                           |
 | Démonstrateur applicatif                                     | Couvert               | `src/app/streamlit_app.py`                                       |
 | Upload image, prédictions, score anomalie                    | Couvert               | `streamlit_app.py`                                               |
 | Texte complémentaire si multimodal disponible                | Couvert               | `streamlit_app.py`                                               |
+| Cohérence run MLflow / modèle exposé                         | Couvert               | section Démonstrateur dans `report/rapport.md`                   |
 | Train/validation/test propre                                 | Couvert               | splits MedMNIST et splits OpenI dans les scripts                 |
 | Seed fixe                                                    | Couvert               | `src/utils/seed.py`                                              |
 | Sauvegarde du meilleur modèle                                | Couvert               | scripts d'entraînement                                           |
@@ -49,10 +53,8 @@ La comparaison OpenI image seule / multimodal image + texte a été exécutée l
 
 Ces éléments dépendent d'un entraînement réel et ne doivent pas être inventés :
 
-- résultats complets longue durée pour les trois modèles supervisés (simple CNN et ViT si un run final est requis) ;
-- captures MLflow si demandées ;
-- captures Streamlit si demandées ;
-- mesures plus fines de temps si un rendu très détaillé est attendu.
+- mesures plus fines de temps si un rendu très détaillé est attendu ;
+- exécuter ou capturer les notebooks si l'enseignant le demande explicitement.
 
 ## Commentaire sur OpenI
 

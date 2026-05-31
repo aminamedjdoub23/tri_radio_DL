@@ -1,6 +1,6 @@
 # Preuves d'exécution locale
 
-Ce document résume les preuves réellement régénérées sur cette machine le 30 mai 2026.
+Ce document résume les preuves réellement régénérées sur cette machine le 31 mai 2026.
 
 ## Dataset
 
@@ -173,6 +173,12 @@ Résumé exporté :
 report/openi_text_results.csv
 ```
 
+Résumé exporté (OpenI multimodal) :
+
+```text
+report/openi_multimodal_results.csv
+```
+
 Artefacts réellement générés localement :
 
 ```text
@@ -217,6 +223,12 @@ Un run final GPU a été exécuté avec :
 config_final.yaml
 ```
 
+Modèles entraînés :
+
+- simple CNN ;
+- transfer learning (DenseNet121) ;
+- ViT tiny.
+
 Artefacts générés :
 
 ```text
@@ -224,9 +236,20 @@ outputs_final/
 mlruns_final/
 ```
 
+Résumé exporté :
+
+```text
+report/mlflow_final_results.csv
+```
+
+Checkpoints présents :
+
+- `outputs_final/best_simple_cnn.pt`
+- `outputs_final/best_transfer.pt`
+- `outputs_final/best_vit.pt`
+
 ## Limites
 
 - les quick runs prouvent le fonctionnement du pipeline, mais ne constituent pas des résultats finaux robustes ;
 - les runs CPU intermédiaires sont plus crédibles, mais restent des entraînements partiels sur sous-échantillon ;
-- un benchmark final complet pour simple CNN et ViT reste à faire si demandé ;
-- les captures d'écran MLflow et Streamlit restent à faire si elles sont demandées dans le rendu final.
+- les captures d'écran MLflow et Streamlit sont ajoutées en annexes du rapport.

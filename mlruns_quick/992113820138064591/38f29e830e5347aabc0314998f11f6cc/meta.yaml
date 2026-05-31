@@ -1,0 +1,14 @@
+artifact_uri: file:C:/Users/Héctor/OneDrive/Desktop/Projects/EFREI/M1-DE/ML-DL/tri_radio_DL/mlruns_quick/992113820138064591/38f29e830e5347aabc0314998f11f6cc/artifacts
+end_time: 1780141524670
+entry_point_name: ''
+experiment_id: '992113820138064591'
+lifecycle_stage: active
+run_id: 38f29e830e5347aabc0314998f11f6cc
+run_name: chestmnist_simple_cnn
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1780141521027
+status: 3
+tags: []
+user_id: Héctor

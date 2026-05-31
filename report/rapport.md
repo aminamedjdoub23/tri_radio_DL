@@ -31,6 +31,8 @@ Le fichier ChestMNIST utilisé localement est configuré en résolution 64 pour 
 
 Le split officiel MedMNIST est conservé pour limiter les choix arbitraires et réduire le risque de fuite de données. La seed est fixée dans tous les scripts pour améliorer la reproductibilité.
 
+Pour OpenI, les splits sont réalisés au niveau image car le CSV officiel ne fournit pas d'identifiants patients exploitables. Cela suffit pour une preuve de concept, mais impose de rester prudent sur l'interprétation en cas de fuite potentielle par patient.
+
 Configuration et contraintes de calcul utilisées pour les runs rapides locaux :
 
 | Élément                              | Valeur                               |
@@ -40,7 +42,7 @@ Configuration et contraintes de calcul utilisées pour les runs rapides locaux :
 | GPU                                  | NVIDIA GeForce GTX 1650 Ti           |
 | RAM                                  | Non relevée                          |
 | Version Python                       | 3.13.1                               |
-| Version PyTorch                      | 2.12.0+cpu                           |
+| Version PyTorch                      | non relevée (CUDA dispo)             |
 | Temps CNN simple                     | environ 19 s en configuration rapide |
 | Temps ResNet18 rapide                | environ 21 s                         |
 | Temps ViT rapide                     | environ 20 s                         |
@@ -53,6 +55,8 @@ Une configuration rapide `config_quick.yaml` a été ajoutée pour vérifier tou
 Pour améliorer la crédibilité expérimentale sur une machine sans GPU, une configuration intermédiaire `config_cpu_medium.yaml` a aussi été ajoutée. Elle conserve ChestMNIST 64, redimensionne les images à 128, utilise 4096 images train, 512 validation, 512 test et 3 epochs. Elle ne remplace pas un entraînement complet, mais fournit des résultats plus informatifs que le mode quick.
 
 Les choix d'optimisation restent simples : AdamW pour les modèles supervisés, Adam pour l'autoencodeur, batch size modéré, dropout dans les classifieurs et weight decay pour limiter le surapprentissage. Le meilleur modèle est sauvegardé selon la métrique de validation. Aucun scheduler complexe n'est imposé, car l'objectif est de garder un pipeline lisible et reproductible.
+
+Un early stopping est activé (monitoring AUC validation, patience fixe) pour limiter le surapprentissage tout en gardant la boucle d'entraînement stable.
 
 Un run final a ensuite été lancé sur GPU avec `config_final.yaml` (CUDA disponible), afin d'obtenir des métriques plus robustes qu'en CPU.
 
@@ -84,11 +88,15 @@ Résultat plus complet obtenu localement avec `config_cpu_medium.yaml` pour le m
 
 Cette ligne ne doit pas être lue comme un résultat final robuste. Elle montre seulement qu'en passant d'un quick run purement technique à un run CPU intermédiaire, le modèle commence à produire une AUC exploitable, même si le seuil par défaut 0.5 reste trop strict pour obtenir un F1 élevé.
 
-Résultat obtenu avec `config_final.yaml` (GPU) pour le modèle de transfert :
+Résultats obtenus avec `config_final.yaml` (GPU) pour les trois modèles supervisés :
 
-| Modèle               | AUC macro test | F1 macro test | Précision macro | Rappel macro | Loss test | Commentaire            |
-| -------------------- | -------------: | ------------: | --------------: | -----------: | --------: | ---------------------- |
-| Transfer final (GPU) |         0.8170 |        0.1166 |          0.3938 |       0.0779 |    0.1544 | DenseNet121, 30 epochs |
+| Modèle           | AUC macro test | F1 macro test | Précision macro | Rappel macro | Loss test | Commentaire            |
+| ---------------- | -------------: | ------------: | --------------: | -----------: | --------: | ---------------------- |
+| Simple CNN final |         0.6683 |        0.0000 |          0.0000 |       0.0000 |    0.1780 | SimpleCNN, 20 epochs   |
+| Transfer final   |         0.8170 |        0.1166 |          0.3938 |       0.0779 |    0.1544 | DenseNet121, 20 epochs |
+| ViT tiny final   |         0.8060 |        0.0952 |          0.3044 |       0.0641 |    0.1574 | ViT tiny, 20 epochs    |
+
+Sur ce run final, le seuil fixe 0.5 pénalise fortement le simple CNN. L'AUC macro reste la métrique la plus fiable pour comparer les modèles dans ce contexte déséquilibré.
 
 ## 6. Détection d'anomalies
 
@@ -101,6 +109,8 @@ Le script sauvegarde aussi une figure d'exemples original/reconstruction dans ML
 Exemple de reconstructions (run CPU intermédiaire) :
 
 ![Reconstructions AE](../img_report/autoencoder_reconstructions.png)
+
+Les images dont l'erreur de reconstruction est la plus élevée sont considérées comme atypiques par l'AE, ce qui fournit une illustration qualitative du score d'anomalie.
 
 Résultats obtenus avec `config_quick.yaml` :
 
@@ -135,7 +145,9 @@ La preuve de concept multimodale utilise OpenI avec un CSV préparé localement.
 
 La fusion intermédiaire est choisie parce qu'elle est simple, claire et suffisante pour un projet étudiant. Elle permet de tester si le compte-rendu apporte une information complémentaire à l'image.
 
-Tableau à compléter si OpenI est préparé :
+L'alignement image-texte est assuré par les paires du CSV OpenI. En inférence, le texte est optionnel et le démonstrateur reste utilisable en image seule.
+
+Résultats OpenI (texte + image + multimodal) :
 
 | Modèle OpenI | AUC macro test | F1 macro test | Commentaire                               |
 | ------------ | -------------: | ------------: | ----------------------------------------- |
@@ -165,10 +177,26 @@ Les métriques principales sont :
 
 Les courbes ROC sont sauvegardées comme artefacts MLflow pour la partie ChestMNIST supervisée.
 
-Exemples de figures générées lors du run final :
+Comparaison visuelle (run final GPU) :
 
-![AUC par classe](../img_report/transfer_auc_per_class.png)
-![ROC multi-classes](../img_report/transfer_roc_curves.png)
+Simple CNN :
+
+![AUC par classe - Simple CNN](../img_report/simple_cnn_auc_per_class.png)
+![ROC multi-classes - Simple CNN](../img_report/simple_cnn_roc_curves.png)
+
+Transfer (DenseNet121) :
+
+![AUC par classe - Transfer](../img_report/transfer_auc_per_class.png)
+![ROC multi-classes - Transfer](../img_report/transfer_roc_curves.png)
+
+ViT tiny :
+
+![AUC par classe - ViT](../img_report/vit_auc_per_class.png)
+![ROC multi-classes - ViT](../img_report/vit_roc_curves.png)
+
+Recapitulatif comparatif : le modèle de transfert (DenseNet121) obtient la meilleure AUC macro, le ViT arrive proche, et le CNN simple reste plus faible. Les courbes ROC et AUC par classe ci-dessus constituent les graphes de comparaison demandés.
+
+Les matrices de confusion par classe ne sont pas présentées ici car la tâche est multi-label et très sensible au seuil ; les ROC/AUC offrent une comparaison plus stable.
 
 Un export synthétique des runs rapides est disponible dans `report/mlflow_quick_results.csv`. Les artefacts complets MLflow sont générés localement dans `mlruns_quick/`.
 
@@ -214,6 +242,8 @@ Le démonstrateur Streamlit permet :
 
 L'application affiche clairement qu'il s'agit d'un prototype pédagogique et non d'un outil médical réel.
 
+Par défaut, le démonstrateur charge les checkpoints `outputs_final/best_*.pt`, ce qui garantit la cohérence entre le run MLflow final et le modèle exposé. Les chemins peuvent être modifiés dans la barre latérale si besoin.
+
 Un smoke test a été réalisé localement en mode headless. L'application a répondu avec un statut HTTP `200`, ce qui confirme qu'elle démarre correctement sur cette machine.
 
 ## 11. Analyse critique
@@ -226,7 +256,7 @@ Les principales limites sont :
 - le ViT peut être fragile si les données ou les epochs sont limités ;
 - l'AE ne détecte pas directement une pathologie clinique ;
 - OpenI est adapté à une preuve de concept, mais trop limité pour conclure fortement sur l'intérêt de la multimodalité.
-- les résultats locaux restent majoritairement CPU et partiels ; ils doivent être présentés comme validation de pipeline ou comme expérience intermédiaire, pas comme benchmark final.
+- les résultats restent locaux et ne remplacent pas une validation externe ; ils doivent être présentés comme démonstration expérimentale, pas comme benchmark clinique.
 
 ## 12. Conclusion et perspectives
 
@@ -236,5 +266,10 @@ Les perspectives possibles sont une meilleure calibration des seuils, une valida
 
 ## Annexes
 
-![alt text](../img_report/image.png)
-![alt text](../img_report/image-1.png)
+Capture MLflow (runs finaux) :
+
+![Capture MLflow](../img_report/image.png)
+
+Capture Streamlit (démonstrateur) :
+
+![Capture Streamlit](../img_report/image-1.png)

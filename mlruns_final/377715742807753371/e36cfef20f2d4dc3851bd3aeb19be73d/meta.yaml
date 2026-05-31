@@ -1,0 +1,14 @@
+artifact_uri: file:C:/Users/Héctor/OneDrive/Desktop/Projects/EFREI/M1-DE/ML-DL/tri_radio_DL/mlruns_final/377715742807753371/e36cfef20f2d4dc3851bd3aeb19be73d/artifacts
+end_time: 1780237863424
+entry_point_name: ''
+experiment_id: '377715742807753371'
+lifecycle_stage: active
+run_id: e36cfef20f2d4dc3851bd3aeb19be73d
+run_name: chestmnist_vit
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1780227277777
+status: 3
+tags: []
+user_id: Héctor

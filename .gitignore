@@ -5,12 +5,6 @@ __pycache__/
 
 data/raw/
 data/openi/
-outputs/
-outputs_quick/
-outputs_openi_text/
-mlruns/
-mlruns_quick/
-mlruns_openi_text/
 .pip-tmp/
 
 *.pt

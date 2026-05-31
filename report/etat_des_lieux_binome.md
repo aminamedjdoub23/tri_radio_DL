@@ -1,6 +1,6 @@
 # État des lieux pour le binôme
 
-Dernière mise à jour : 30 mai 2026.
+Dernière mise à jour : 31 mai 2026.
 
 ## Ce qui est prêt
 
@@ -12,7 +12,7 @@ Le dépôt GitHub contient une base complète et cohérente avec la consigne :
 - CNN simple, ResNet18 et ViT ;
 - autoencodeur convolutionnel pour score d'anomalie ;
 - preuve de concept OpenI texte seul réellement exécutée ;
-- preuve de concept multimodale image + texte prévue dans le code ;
+- preuve de concept multimodale image + texte exécutée ;
 - tracking MLflow ;
 - démonstrateur Streamlit ;
 - rapport structuré ;
@@ -28,9 +28,9 @@ Versions vérifiées :
 | Élément     | Valeur                   |
 | ----------- | ------------------------ |
 | Python      | 3.13.1                   |
-| PyTorch     | 2.12.0+cpu               |
-| torchvision | 0.27.0+cpu               |
-| CUDA        | non disponible           |
+| PyTorch     | non relevée (CUDA dispo) |
+| torchvision | non relevée              |
+| CUDA        | disponible               |
 | CPU         | AMD64 Family 25 Model 68 |
 
 Le projet a été validé avec :
@@ -171,6 +171,16 @@ Résultat texte OpenI :
 
 Les images PNG OpenI ont été téléchargées et `train_multimodal.py` a été exécuté, ce qui complète la comparaison image seule / texte seul / multimodal sur OpenI.
 
+## Runs finaux GPU (ChestMNIST)
+
+Les trois modèles supervisés ont été entraînés avec `config_final.yaml` :
+
+| Modèle     | AUC macro test | F1 macro test | Loss test |
+| ---------- | -------------: | ------------: | --------: |
+| simple_cnn |         0.6683 |        0.0000 |    0.1780 |
+| transfer   |         0.8170 |        0.1166 |    0.1544 |
+| vit        |         0.8060 |        0.0952 |    0.1574 |
+
 ## Démonstrateur testé
 
 Un smoke test Streamlit a été fait en local :
@@ -186,11 +196,8 @@ Résultat :
 
 ## Ce qui reste à faire pour un rendu final très solide
 
-- lancer des entraînements plus longs, idéalement sur GPU ;
-- produire au moins une comparaison supervisée plus robuste que les sous-échantillons CPU ;
-- produire des runs finals pour simple CNN et ViT si un benchmark final est exigé ;
-- ajouter des captures MLflow et Streamlit si demandées ;
-- exécuter ou capturer les notebooks si le professeur veut des preuves notebook explicites.
+- exécuter ou capturer les notebooks si le professeur veut des preuves notebook explicites ;
+- ajouter des mesures de temps plus précises si un rendu très détaillé est exigé.
 
 ## À dire si on rend maintenant
 
@@ -200,10 +207,11 @@ Le code et les livrables sont complets, les artefacts locaux existent réellemen
 - checkpoints et traces MLflow présents ;
 - Streamlit validé ;
 - OpenI texte seul et multimodal exécutés ;
+- runs finaux GPU simple CNN / transfer / ViT exécutés ;
 - rapport et exports mis à jour avec de vraies métriques.
 
 En revanche, il faut rester honnête :
 
 - les quick runs ne sont pas des résultats finaux ;
-- les runs CPU intermédiaires sont des résultats partiels plus crédibles, mais pas encore un benchmark final ;
-- un benchmark final complet simple CNN / ViT reste à lancer si demandé.
+- les runs CPU intermédiaires restent utiles pour comparer la progression, mais ne remplacent pas les runs finaux GPU ;
+- les résultats restent locaux et nécessiteraient une validation externe pour conclure.

@@ -1,0 +1,14 @@
+artifact_uri: file:C:/Users/Héctor/OneDrive/Desktop/Projects/EFREI/M1-DE/ML-DL/tri_radio_DL/mlruns_quick/992113820138064591/392e5cb343dd474fb23aa2662120af61/artifacts
+end_time: 1780141592964
+entry_point_name: ''
+experiment_id: '992113820138064591'
+lifecycle_stage: active
+run_id: 392e5cb343dd474fb23aa2662120af61
+run_name: chestmnist_autoencoder
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1780141591285
+status: 3
+tags: []
+user_id: Héctor

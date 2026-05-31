@@ -1,0 +1,14 @@
+artifact_uri: file:C:/Users/Héctor/OneDrive/Desktop/Projects/EFREI/M1-DE/ML-DL/tri_radio_DL/mlruns_openi_text/619480377239562558/3af30bd8f7094b369109e5281dcff261/artifacts
+end_time: 1780142221465
+entry_point_name: ''
+experiment_id: '619480377239562558'
+lifecycle_stage: active
+run_id: 3af30bd8f7094b369109e5281dcff261
+run_name: openi_text_tfidf_mlp
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1780142219509
+status: 3
+tags: []
+user_id: Héctor
