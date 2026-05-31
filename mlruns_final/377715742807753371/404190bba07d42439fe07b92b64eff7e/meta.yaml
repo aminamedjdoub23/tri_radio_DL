@@ -1,5 +1,5 @@
 artifact_uri: file:C:/Users/Héctor/OneDrive/Desktop/Projects/EFREI/M1-DE/ML-DL/tri_radio_DL/mlruns_final/377715742807753371/404190bba07d42439fe07b92b64eff7e/artifacts
-end_time: null
+end_time: 1780221635582
 entry_point_name: ''
 experiment_id: '377715742807753371'
 lifecycle_stage: active
@@ -9,6 +9,6 @@ source_name: ''
 source_type: 4
 source_version: ''
 start_time: 1780215041327
-status: 1
+status: 3
 tags: []
 user_id: Héctor
